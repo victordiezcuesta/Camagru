@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../Security/Csrf.php';
 require_once __DIR__ . '/../Security/Session.php';
+require_once __DIR__ . '/../Services/Mailer.php';
 
 class AuthController
 {
@@ -213,14 +214,28 @@ class AuthController
 		]);
 
 		$verificationUrl =
-			'http://localhost:8080/verify?token='
+			getenv('APP_URL')
+			. '/verify?token='
 			. urlencode($verificationToken);
 
+		$mailer = new Mailer();
+
+		if (!$mailer->sendVerificationEmail($email, $username, $verificationUrl))
+		{
+			$pdo->prepare(
+				'DELETE FROM users WHERE id = :id' //Si el INSERT funciona pero el SMTP falla, Eso dejaría una cuenta bloqueada, por eso lo eliminamos
+			)->execute([
+				'id' => $pdo->lastInsertId()
+			]);
+
+			http_response_code(500);
+			echo 'Unable to send verification email.';
+			exit;
+		}
+
 		echo '<h1>Registration successful.</h1>';
-		echo '<p>Please verify your email address.</p>';
-		echo '<p><a href="' . htmlspecialchars($verificationUrl, ENT_QUOTES, 'UTF-8') . '">';
-		echo 'Verify your account';
-		echo '</a></p>';
+		echo '<p>Please check your email to verify your account.</p>';
+		echo '<p><a href="/login">Back to login</a></p>';
 	}
 
 	public function verify(): void
@@ -378,7 +393,8 @@ class AuthController
 		* Later this URL will be sent by email.
 		*/
 		$resetUrl =
-			'http://localhost:8080/reset-password?token='
+			getenv('APP_URL')
+			. '/reset-password?token='
 			. urlencode($resetToken);
 
 		echo '<h1>Password reset</h1>';

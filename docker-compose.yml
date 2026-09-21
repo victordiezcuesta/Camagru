@@ -23,6 +23,15 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+
+      APP_URL: ${APP_URL}
+
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION}
     volumes:
       - ./public:/var/www/html/public
       - ./src:/var/www/html/src

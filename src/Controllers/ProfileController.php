@@ -202,8 +202,9 @@ class ProfileController
         echo '<p>Please verify your new email address.</p>';
 
         $verificationUrl =
-            'http://localhost:8080/verify?token='
-            . urlencode($verificationToken);
+			getenv('APP_URL')
+			. '/verify?token='
+			. urlencode($verificationToken);
 
         echo '<p><a href="'
             . htmlspecialchars(
