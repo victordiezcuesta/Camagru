@@ -191,6 +191,7 @@ DB_ROOT_PASSWORD=root_password
 ===== ./.gitignore =====
 ==================================================
 notascamagru.txt
+.env
 
 
 ==================================================
@@ -815,7 +816,9 @@ class AuthController
 			'verification_expires_at' => $verificationExpiresAt
 		]);
 
-		$verificationUrl = 'http://localhost:8080/verify?token=' . urlencode($verificationToken);
+		$verificationUrl =
+			'http://localhost:8080/verify?token='
+			. urlencode($verificationToken);
 
 		echo '<h1>Registration successful.</h1>';
 		echo '<p>Please verify your email address.</p>';
@@ -967,7 +970,8 @@ class AuthController
 		* Temporary development URL.
 		* Later this URL will be sent by email.
 		*/
-		$resetUrl = 'http://localhost:8080/reset-password?token='
+		$resetUrl =
+			'http://localhost:8080/reset-password?token='
 			. urlencode($resetToken);
 
 		echo '<h1>Password reset</h1>';
@@ -1189,7 +1193,7 @@ class ProfileController
 		$pdo = $database->getConnection();
 
 		$stmt = $pdo->prepare(
-			'SELECT username, email
+			'SELECT username, email, email_verified
 			FROM users
 			WHERE id = :id'
 		);

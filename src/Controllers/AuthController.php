@@ -6,6 +6,23 @@ require_once __DIR__ . '/../config/Database.php';
 
 class AuthController
 {
+
+	private function startSession(): void
+	{
+		if (session_status() === PHP_SESSION_NONE)
+		{
+			session_set_cookie_params([
+				'lifetime' => 0,
+				'path' => '/',
+				'secure' => false,
+				'httponly' => true, //HttpOnly no significa que la cookie esté cifrada. Simplemente impide que JavaScript acceda a ella.
+				'samesite' => 'Lax'  //Limita el envío de la cookie desde otros sitios
+			]);
+
+			session_start();
+		}
+	}
+
 	public function login(): void
 	{
 		require __DIR__ . '/../Views/auth/login.php';
@@ -76,15 +93,7 @@ class AuthController
 			exit;
 		}
 
-		session_set_cookie_params([
-			'lifetime' => 0,
-			'path' => '/',
-			'secure' => false,
-			'httponly' => true,  //HttpOnly no significa que la cookie esté cifrada. Simplemente impide que JavaScript acceda a ella.
-			'samesite' => 'Lax'  //Limita el envío de la cookie desde otros sitios
-		]);
-
-		session_start();
+		$this->startSession();
 
 		session_regenerate_id(true);
 
@@ -196,7 +205,9 @@ class AuthController
 			'verification_expires_at' => $verificationExpiresAt
 		]);
 
-		$verificationUrl = 'http://localhost:8080/verify?token=' . urlencode($verificationToken);
+		$verificationUrl =
+			'http://localhost:8080/verify?token='
+			. urlencode($verificationToken);
 
 		echo '<h1>Registration successful.</h1>';
 		echo '<p>Please verify your email address.</p>';
@@ -348,7 +359,8 @@ class AuthController
 		* Temporary development URL.
 		* Later this URL will be sent by email.
 		*/
-		$resetUrl = 'http://localhost:8080/reset-password?token='
+		$resetUrl =
+			'http://localhost:8080/reset-password?token='
 			. urlencode($resetToken);
 
 		echo '<h1>Password reset</h1>';
@@ -504,8 +516,7 @@ class AuthController
 
 	public function logout(): void
 	{
-		session_start();
-
+		$this->startSession();
 		$_SESSION = [];
 
 		if (ini_get('session.use_cookies'))

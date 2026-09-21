@@ -6,6 +6,22 @@ require_once __DIR__ . '/../config/Database.php';
 
 class ProfileController
 {
+	private function startSession(): void
+	{
+		if (session_status() === PHP_SESSION_NONE)
+		{
+			session_set_cookie_params([
+				'lifetime' => 0,
+				'path' => '/',
+				'secure' => false,
+				'httponly' => true,
+				'samesite' => 'Lax'
+			]);
+
+			session_start();
+		}
+	}
+
 	public function index(): void
 	{
 		$userId = $this->requireAuthentication();
@@ -87,8 +103,6 @@ class ProfileController
 			'username' => $username,
 			'id' => $userId
 		]);
-
-		session_start();
 
 		$_SESSION['username'] = $username;
 
@@ -277,7 +291,7 @@ class ProfileController
 
 	private function requireAuthentication(): int //si intentan hacer http://localhost:8080/profile sin estar iniciados sesion no puedan
 	{
-		session_start();
+		$this->startSession();
 
 		if (!isset($_SESSION['user_id']))
 		{
