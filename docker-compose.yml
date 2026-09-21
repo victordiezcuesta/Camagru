@@ -27,7 +27,8 @@ services:
       - ./public:/var/www/html/public
       - ./src:/var/www/html/src
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - camagru_network
 
@@ -40,6 +41,12 @@ services:
       MARIADB_USER: ${DB_USER}
       MARIADB_PASSWORD: ${DB_PASSWORD}
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
     volumes:
       - db_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
