@@ -19,5 +19,8 @@ CREATE TABLE users (
     email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     /* un booleano que por defecto es false*/
 
+    verification_token VARCHAR(64) DEFAULT NULL,
+    verification_expires_at DATETIME DEFAULT NULL,
+
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

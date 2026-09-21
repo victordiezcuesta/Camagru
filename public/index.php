@@ -41,6 +41,12 @@ if ($path === '/register' && $method === 'POST')
 	exit;
 }
 
+if ($path === '/verify' && $method === 'GET')
+{
+    $controller->verify();
+    exit;
+}
+
 if ($path === '/logout' && $method === 'GET')
 {
 	$controller->logout();

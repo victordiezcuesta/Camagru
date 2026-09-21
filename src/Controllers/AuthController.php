@@ -62,6 +62,13 @@ class AuthController
 			exit;
 		}
 
+		if (!$user['email_verified'])
+		{
+			http_response_code(403);
+			echo 'Please verify your email address before logging in.';
+			exit;
+		}
+
 		if (!password_verify($password, $user['password']))
 		{
 			http_response_code(401);
@@ -157,6 +164,8 @@ class AuthController
 
 		$passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
+		$verificationToken = bin2hex(random_bytes(32)); //genereamos un token a voleo
+
 		$stmt = $pdo->prepare(
 			'INSERT INTO users (username, email, password)
 			VALUES (:username, :email, :password)'
@@ -169,6 +178,24 @@ class AuthController
 		]);
 
 		echo 'Registration successful.';
+	}
+
+	public function verify(): void
+	{
+		$token = $_GET['token'] ?? '';
+
+		if ($token === '')
+		{
+			http_response_code(400);
+			echo 'Invalid verification link.';
+			exit;
+		}
+
+		// Buscar token en la base de datos
+		// Comprobar expiración
+		// Marcar email_verified = TRUE
+		// Eliminar token
+		// Redirigir a login
 	}
 
 	public function logout(): void

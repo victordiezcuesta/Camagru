@@ -464,7 +464,7 @@ if ($path === '/register' && $method === 'POST')
 
 if ($path === '/logout' && $method === 'GET')
 {
-	$authController->logout();
+	$controller->logout();
 	exit;
 }
 
