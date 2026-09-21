@@ -22,5 +22,8 @@ CREATE TABLE users (
     verification_token VARCHAR(64) DEFAULT NULL,
     verification_expires_at DATETIME DEFAULT NULL,
 
+    password_reset_token VARCHAR(64) DEFAULT NULL,
+    password_reset_expires_at DATETIME DEFAULT NULL,
+
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

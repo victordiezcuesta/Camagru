@@ -47,6 +47,30 @@ if ($path === '/verify' && $method === 'GET')
     exit;
 }
 
+if ($path === '/forgot-password' && $method === 'GET')
+{
+    $controller->forgotPassword();
+    exit;
+}
+
+if ($path === '/forgot-password' && $method === 'POST')
+{
+    $controller->forgotPasswordPost();
+    exit;
+}
+
+if ($path === '/reset-password' && $method === 'GET')
+{
+    $controller->resetPassword();
+    exit;
+}
+
+if ($path === '/reset-password' && $method === 'POST')
+{
+    $controller->resetPasswordPost();
+    exit;
+}
+
 if ($path === '/logout' && $method === 'GET')
 {
 	$controller->logout();
