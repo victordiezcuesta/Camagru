@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../Security/Csrf.php';
 
 class AuthController
 {
@@ -25,11 +26,22 @@ class AuthController
 
 	public function login(): void
 	{
+		$this->startSession();
+
+		$csrfToken = Csrf::token();
+
 		require __DIR__ . '/../Views/auth/login.php';
 	}
 
 	public function loginPost(): void
 	{
+		if (!Csrf::validate($_POST['csrf_token'] ?? null))
+		{
+			http_response_code(403);
+			echo 'Invalid CSRF token.';
+			exit;
+		}
+
 		$username = trim($_POST['username'] ?? '');
 		$password = $_POST['password'] ?? '';
 
@@ -106,11 +118,22 @@ class AuthController
 
 	public function register(): void
 	{
+		$this->startSession();
+
+		$csrfToken = Csrf::token();
+
 		require __DIR__ . '/../Views/auth/register.php';
 	}
 
 	public function registerPost(): void
 	{
+		if (!Csrf::validate($_POST['csrf_token'] ?? null))
+		{
+			http_response_code(403);
+			echo 'Invalid CSRF token.';
+			exit;
+		}
+
 		$username = trim($_POST['username'] ?? ''); //Busca dentro de $_POST el campo llamado username. Si no existe, utiliza ''.
 		$email = trim($_POST['email'] ?? '');
 		$password = $_POST['password'] ?? '';
@@ -277,11 +300,22 @@ class AuthController
 
 	public function forgotPassword(): void
 	{
+		$this->startSession();
+
+		$csrfToken = Csrf::token();
+
 		require __DIR__ . '/../Views/auth/forgot-password.php';
 	}
 
 	public function forgotPasswordPost(): void
 	{
+		if (!Csrf::validate($_POST['csrf_token'] ?? null))
+		{
+			http_response_code(403);
+			echo 'Invalid CSRF token.';
+			exit;
+		}
+
 		$email = trim($_POST['email'] ?? '');
 
 		if ($email === '')
@@ -413,21 +447,29 @@ class AuthController
 			exit;
 		}
 
-		if (
-			$user['password_reset_expires_at'] === null
-			|| strtotime($user['password_reset_expires_at']) < time()
-		)
+		if ($user['password_reset_expires_at'] === null || strtotime($user['password_reset_expires_at']) < time())
 		{
 			http_response_code(400);
 			echo 'Password reset link has expired.';
 			exit;
 		}
 
+		$this->startSession();
+
+		$csrfToken = Csrf::token();
+
 		require __DIR__ . '/../Views/auth/reset-password.php';
 	}
 
 	public function resetPasswordPost(): void
 	{
+		if (!Csrf::validate($_POST['csrf_token'] ?? null))
+		{
+			http_response_code(403);
+			echo 'Invalid CSRF token.';
+			exit;
+		}
+
 		$token = $_POST['token'] ?? '';
 		$password = $_POST['password'] ?? '';
 		$passwordConfirmation = $_POST['password_confirmation'] ?? '';
@@ -517,6 +559,14 @@ class AuthController
 	public function logout(): void
 	{
 		$this->startSession();
+
+		if (!Csrf::validate($_POST['csrf_token'] ?? null))
+		{
+			http_response_code(403);
+			echo 'Invalid CSRF token.';
+			exit;
+		}
+
 		$_SESSION = [];
 
 		if (ini_get('session.use_cookies'))

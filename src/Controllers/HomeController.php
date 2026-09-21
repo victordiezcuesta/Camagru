@@ -2,11 +2,24 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../Security/Csrf.php';
+
 class HomeController
 {
 	public function index(): void
 	{
-		session_start();
+		if (session_status() === PHP_SESSION_NONE)
+		{
+			session_set_cookie_params([
+				'lifetime' => 0,
+				'path' => '/',
+				'secure' => false,
+				'httponly' => true,
+				'samesite' => 'Lax'
+			]);
+
+			session_start();
+		}
 
 		$isAuthenticated = isset($_SESSION['user_id']); //Si existe, sabemos que tenemos una sesión autenticada.
 

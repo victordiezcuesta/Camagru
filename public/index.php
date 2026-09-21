@@ -73,10 +73,10 @@ if ($path === '/reset-password' && $method === 'POST')
     exit;
 }
 
-if ($path === '/logout' && $method === 'GET')
+if ($path === '/logout' && $method === 'POST')
 {
-	$controller->logout();
-	exit;
+    $controller->logout();
+    exit;
 }
 
 if ($path === '/profile' && $method === 'GET')
