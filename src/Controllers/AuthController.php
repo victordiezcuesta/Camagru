@@ -70,8 +70,11 @@ class AuthController
 		}
 
 		session_set_cookie_params([
-			'httponly' => true, //HttpOnly no significa que la cookie esté cifrada. Simplemente impide que JavaScript acceda a ella.
-			'samesite' => 'Lax' //Limita el envío de la cookie desde otros sitios
+			'lifetime' => 0,
+			'path' => '/',
+			'secure' => false,
+			'httponly' => true,  //HttpOnly no significa que la cookie esté cifrada. Simplemente impide que JavaScript acceda a ella.
+			'samesite' => 'Lax'  //Limita el envío de la cookie desde otros sitios
 		]);
 
 		session_start();
@@ -166,5 +169,32 @@ class AuthController
 		]);
 
 		echo 'Registration successful.';
+	}
+
+	public function logout(): void
+	{
+		session_start();
+
+		$_SESSION = [];
+
+		if (ini_get('session.use_cookies'))
+		{
+			$params = session_get_cookie_params();
+
+			setcookie(
+				session_name(),
+				'',
+				time() - 42000,
+				$params['path'],
+				$params['domain'],
+				$params['secure'],
+				$params['httponly']
+			);
+		}
+
+		session_destroy();
+
+		header('Location: /login');
+		exit;
 	}
 }

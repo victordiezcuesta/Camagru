@@ -20,13 +20,15 @@
     ├── config
     │   └── Database.php
     ├── Controllers
-    │   └── AuthController.php
+    │   ├── AuthController.php
+    │   └── HomeController.php
     └── Views
-        └── auth
-            ├── login.php
-            └── register.php
+        ├── auth
+        │   ├── login.php
+        │   └── register.php
+        └── home.php
 
-12 directories, 13 files
+12 directories, 15 files
 
 ==================== ARCHIVOS ====================
 
@@ -422,11 +424,19 @@ body {
 declare(strict_types=1); //"PHP, dentro de este archivo, intenta ser estricto con los tipos que he declarado."
 
 require_once __DIR__ . '/../src/Controllers/AuthController.php'; //Carga y ejecuta este otro archivo PHP, pero asegúrate de cargarlo una sola vez. parecido a los .hpp y .h pero sin serlo
+require_once __DIR__ . '/../src/Controllers/HomeController.php';
 
 $controller = new AuthController();
+$homeController = new HomeController();
 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); //$_SERVER['REQUEST_URI'] contiene la petición realizada por el navegador. y si tiene /register?foo=bar se quedaria solo /register
 $method = $_SERVER['REQUEST_METHOD']; //es el method del html es decir el get el set el post, ...
+
+if ($path === '/' && $method === 'GET')
+{
+	$homeController->index();
+	exit;
+}
 
 if ($path === '/login' && $method === 'GET')
 {
@@ -449,6 +459,12 @@ if ($path === '/register' && $method === 'GET')
 if ($path === '/register' && $method === 'POST')
 {
 	$controller->registerPost();
+	exit;
+}
+
+if ($path === '/logout' && $method === 'GET')
+{
+	$authController->logout();
 	exit;
 }
 
@@ -580,8 +596,11 @@ class AuthController
 		}
 
 		session_set_cookie_params([
-			'httponly' => true, //HttpOnly no significa que la cookie esté cifrada. Simplemente impide que JavaScript acceda a ella.
-			'samesite' => 'Lax' //Limita el envío de la cookie desde otros sitios
+			'lifetime' => 0,
+			'path' => '/',
+			'secure' => false,
+			'httponly' => true,  //HttpOnly no significa que la cookie esté cifrada. Simplemente impide que JavaScript acceda a ella.
+			'samesite' => 'Lax'  //Limita el envío de la cookie desde otros sitios
 		]);
 
 		session_start();
@@ -676,6 +695,54 @@ class AuthController
 		]);
 
 		echo 'Registration successful.';
+	}
+
+	public function logout(): void
+	{
+		session_start();
+
+		$_SESSION = [];
+
+		if (ini_get('session.use_cookies'))
+		{
+			$params = session_get_cookie_params();
+
+			setcookie(
+				session_name(),
+				'',
+				time() - 42000,
+				$params['path'],
+				$params['domain'],
+				$params['secure'],
+				$params['httponly']
+			);
+		}
+
+		session_destroy();
+
+		header('Location: /login');
+		exit;
+	}
+}
+
+==================================================
+===== ./src/Controllers/HomeController.php =====
+==================================================
+<?php
+
+declare(strict_types=1);
+
+class HomeController
+{
+	public function index(): void
+	{
+		session_start();
+
+		$isAuthenticated = isset($_SESSION['user_id']); //Si existe, sabemos que tenemos una sesión autenticada.
+
+		$username = $_SESSION['username'] ?? null;
+
+		require __DIR__ . '/../Views/home.php';
 	}
 }
 
@@ -850,6 +917,79 @@ class AuthController
             </div>
 
         </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 Camagru</p>
+        </div>
+    </footer>
+
+</body>
+</html>
+
+==================================================
+===== ./src/Views/home.php =====
+==================================================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Camagru</title>
+
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div class="container">
+
+            <a href="/" class="logo">Camagru</a>
+
+            <?php if ($isAuthenticated): ?>
+
+                <a href="/logout">
+                    Logout
+                </a>
+
+            <?php else: ?>
+
+                <a href="/login">
+                    Login
+                </a>
+
+            <?php endif; ?>
+
+        </div>
+    </header>
+
+    <main class="main-content">
+
+        <section class="auth-card">
+
+            <?php if ($isAuthenticated): ?>
+
+                <h1>Welcome, <?= htmlspecialchars($username, ENT_QUOTES, 'UTF-8') ?></h1>
+
+                <p class="auth-subtitle">
+                    You are logged in.
+                </p>
+
+            <?php else: ?>
+
+                <h1>Welcome to Camagru</h1>
+
+                <p class="auth-subtitle">
+                    Please log in to continue.
+                </p>
+
+            <?php endif; ?>
+
+        </section>
+
     </main>
 
     <footer class="site-footer">
