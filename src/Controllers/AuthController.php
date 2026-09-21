@@ -4,29 +4,13 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../Security/Csrf.php';
+require_once __DIR__ . '/../Security/Session.php';
 
 class AuthController
 {
-
-	private function startSession(): void
-	{
-		if (session_status() === PHP_SESSION_NONE)
-		{
-			session_set_cookie_params([
-				'lifetime' => 0,
-				'path' => '/',
-				'secure' => false,
-				'httponly' => true, //HttpOnly no significa que la cookie esté cifrada. Simplemente impide que JavaScript acceda a ella.
-				'samesite' => 'Lax'  //Limita el envío de la cookie desde otros sitios
-			]);
-
-			session_start();
-		}
-	}
-
 	public function login(): void
 	{
-		$this->startSession();
+		Session::start();
 
 		$csrfToken = Csrf::token();
 
@@ -105,7 +89,7 @@ class AuthController
 			exit;
 		}
 
-		$this->startSession();
+		Session::start();
 
 		session_regenerate_id(true);
 
@@ -118,7 +102,7 @@ class AuthController
 
 	public function register(): void
 	{
-		$this->startSession();
+		Session::start();
 
 		$csrfToken = Csrf::token();
 
@@ -300,7 +284,7 @@ class AuthController
 
 	public function forgotPassword(): void
 	{
-		$this->startSession();
+		Session::start();
 
 		$csrfToken = Csrf::token();
 
@@ -454,7 +438,7 @@ class AuthController
 			exit;
 		}
 
-		$this->startSession();
+		Session::start();
 
 		$csrfToken = Csrf::token();
 
@@ -558,7 +542,7 @@ class AuthController
 
 	public function logout(): void
 	{
-		$this->startSession();
+		Session::start();
 
 		if (!Csrf::validate($_POST['csrf_token'] ?? null))
 		{

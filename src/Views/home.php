@@ -28,7 +28,7 @@
                         type="hidden"
                         name="csrf_token"
                         value="<?= htmlspecialchars(
-                            Csrf::token(),
+                            $csrfToken,
                             ENT_QUOTES,
                             'UTF-8'
                         ) ?>"

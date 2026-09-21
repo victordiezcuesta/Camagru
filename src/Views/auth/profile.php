@@ -43,9 +43,7 @@
                 Manage your Camagru account.
             </p>
 
-
             <!-- Current account information -->
-
             <div class="profile-section">
 
                 <h2>Account information</h2>
@@ -106,9 +104,7 @@
 
             </div>
 
-
             <!-- Change username -->
-
             <div class="profile-section">
 
                 <h2>Change username</h2>
@@ -153,9 +149,7 @@
 
             </div>
 
-
             <!-- Change email -->
-
             <div class="profile-section">
 
                 <h2>Change email</h2>
@@ -199,9 +193,7 @@
 
             </div>
 
-
             <!-- Change password -->
-
             <div class="profile-section">
 
                 <h2>Change password</h2>
@@ -277,7 +269,6 @@
 
             </div>
 
-
             <div class="auth-links">
 
                 <p>
@@ -286,22 +277,20 @@
                     </a>
                 </p>
 
-                <p>
-                    <form action="/logout" method="POST">
+                <form action="/logout" method="POST">
 
-                        <input
-                            type="hidden"
-                            name="csrf_token"
-                            value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>"
-                        >
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>"
+                    >
 
-                        <button type="submit" class="btn-primary">
-                            Logout
-                        </button>
+                    <button type="submit" class="btn-primary">
+                        Logout
+                    </button>
 
-                    </form>
-                </p>
-
+                </form>
+ 
             </div>
 
         </section>

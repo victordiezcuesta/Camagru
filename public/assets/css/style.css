@@ -26,7 +26,6 @@ body {
 }
 
 /* Header */
-
 .site-header {
     height: 70px;
 
@@ -46,7 +45,6 @@ body {
 }
 
 /* Main */
-
 .main-content {
     flex: 1;
 
@@ -58,7 +56,6 @@ body {
 }
 
 /* Login card */
-
 .auth-card {
     width: 100%;
     max-width: 420px;
@@ -91,7 +88,6 @@ body {
 }
 
 /* Form */
-
 .auth-form {
     display: flex;
     flex-direction: column;
@@ -127,7 +123,6 @@ body {
 }
 
 /* Button */
-
 .btn-primary {
     width: 100%;
 
@@ -150,7 +145,6 @@ body {
 }
 
 /* Links */
-
 .auth-links {
     margin-top: 25px;
 
@@ -174,7 +168,6 @@ body {
 }
 
 /* Footer */
-
 .site-footer {
     padding: 20px 0;
 
@@ -188,7 +181,6 @@ body {
 }
 
 /* Mobile */
-
 @media (max-width: 480px) {
 
     .container {
@@ -205,7 +197,6 @@ body {
 }
 
 /* Profile */
-
 .profile-section {
     margin-top: 30px;
     padding-top: 25px;

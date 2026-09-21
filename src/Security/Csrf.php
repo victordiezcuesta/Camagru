@@ -2,22 +2,13 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/Session.php';
+
 class Csrf
 {
-	public function token(): string
+	public static function token(): string
 	{
-		if (session_status() === PHP_SESSION_NONE)
-		{
-			session_set_cookie_params([
-				'lifetime' => 0,
-				'path' => '/',
-				'secure' => false,
-				'httponly' => true,
-				'samesite' => 'Lax'
-			]);
-
-			session_start();
-		}
+		Session::start();
 
 		if (!isset($_SESSION['csrf_token']))
 		{
@@ -27,26 +18,18 @@ class Csrf
 		return $_SESSION['csrf_token'];
 	}
 
-	public function validate(?string $token): bool
+	public static function validate(?string $token): bool
 	{
-		if (session_status() === PHP_SESSION_NONE)
-		{
-			session_set_cookie_params([
-				'lifetime' => 0,
-				'path' => '/',
-				'secure' => false,
-				'httponly' => true,
-				'samesite' => 'Lax'
-			]);
-
-			session_start();
-		}
+		Session::start();
 
 		if ($token === null || !isset($_SESSION['csrf_token']))
 		{
 			return false;
 		}
 
-		return hash_equals($_SESSION['csrf_token'], $token);
+		return hash_equals(
+			$_SESSION['csrf_token'],
+			$token
+		);
 	}
 }
