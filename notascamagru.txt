@@ -21,16 +21,18 @@
     │   └── Database.php
     ├── Controllers
     │   ├── AuthController.php
-    │   └── HomeController.php
+    │   ├── HomeController.php
+    │   └── ProfileController.php
     └── Views
         ├── auth
         │   ├── forgot-password.php
         │   ├── login.php
+        │   ├── profile.php
         │   ├── register.php
         │   └── reset-password.php
         └── home.php
 
-12 directories, 17 files
+12 directories, 19 files
 
 ==================== ARCHIVOS ====================
 
@@ -424,6 +426,33 @@ body {
     }
 }
 
+/* Profile */
+
+.profile-section {
+    margin-top: 30px;
+    padding-top: 25px;
+
+    border-top: 1px solid #e5e7eb;
+}
+
+.profile-section h2 {
+    margin-bottom: 20px;
+
+    font-size: 20px;
+}
+
+.profile-status {
+    margin-top: 15px;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+.profile-status strong {
+    color: #1f2937;
+}
+
 ==================================================
 ===== ./public/index.php =====
 ==================================================
@@ -433,9 +462,11 @@ declare(strict_types=1); //"PHP, dentro de este archivo, intenta ser estricto co
 
 require_once __DIR__ . '/../src/Controllers/AuthController.php'; //Carga y ejecuta este otro archivo PHP, pero asegúrate de cargarlo una sola vez. parecido a los .hpp y .h pero sin serlo
 require_once __DIR__ . '/../src/Controllers/HomeController.php';
+require_once __DIR__ . '/../src/Controllers/ProfileController.php';
 
 $controller = new AuthController();
 $homeController = new HomeController();
+$profileController = new ProfileController();
 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); //$_SERVER['REQUEST_URI'] contiene la petición realizada por el navegador. y si tiene /register?foo=bar se quedaria solo /register
 $method = $_SERVER['REQUEST_METHOD']; //es el method del html es decir el get el set el post, ...
@@ -503,6 +534,30 @@ if ($path === '/reset-password' && $method === 'POST')
 if ($path === '/logout' && $method === 'GET')
 {
 	$controller->logout();
+	exit;
+}
+
+if ($path === '/profile' && $method === 'GET')
+{
+	$profileController->index();
+	exit;
+}
+
+if ($path === '/profile/username' && $method === 'POST')
+{
+	$profileController->updateUsername();
+	exit;
+}
+
+if ($path === '/profile/email' && $method === 'POST')
+{
+	$profileController->updateEmail();
+	exit;
+}
+
+if ($path === '/profile/password' && $method === 'POST')
+{
+	$profileController->updatePassword();
 	exit;
 }
 
@@ -1116,6 +1171,300 @@ class HomeController
 }
 
 ==================================================
+===== ./src/Controllers/ProfileController.php =====
+==================================================
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../config/Database.php';
+
+class ProfileController
+{
+	public function index(): void
+	{
+		$userId = $this->requireAuthentication();
+
+		$database = new Database();
+		$pdo = $database->getConnection();
+
+		$stmt = $pdo->prepare(
+			'SELECT username, email
+			FROM users
+			WHERE id = :id'
+		);
+
+		$stmt->execute([
+			'id' => $userId
+		]);
+
+		$user = $stmt->fetch();
+
+		if ($user === false)
+		{
+			http_response_code(404);
+			echo 'User not found.';
+			exit;
+		}
+
+		require __DIR__ . '/../Views/auth/profile.php';
+	}
+
+	public function updateUsername(): void
+	{
+		$userId = $this->requireAuthentication();
+
+		$username = trim($_POST['username'] ?? '');
+
+		if ($username === '')
+		{
+			http_response_code(400);
+			echo 'Username is required.';
+			exit;
+		}
+
+		if (strlen($username) > 50)
+		{
+			http_response_code(400);
+			echo 'Username must contain at most 50 characters.';
+			exit;
+		}
+
+		$database = new Database();
+		$pdo = $database->getConnection();
+
+		$stmt = $pdo->prepare(
+			'SELECT id
+			FROM users
+			WHERE username = :username
+			AND id != :id'
+		);
+
+		$stmt->execute([
+			'username' => $username,
+			'id' => $userId
+		]);
+
+		if ($stmt->fetch() !== false)
+		{
+			http_response_code(409);
+			echo 'Username already exists.';
+			exit;
+		}
+
+		$stmt = $pdo->prepare(
+			'UPDATE users
+			SET username = :username
+			WHERE id = :id'
+		);
+
+		$stmt->execute([
+			'username' => $username,
+			'id' => $userId
+		]);
+
+		session_start();
+
+		$_SESSION['username'] = $username;
+
+		header('Location: /profile');
+		exit;
+	}
+
+	public function updateEmail(): void
+	{
+		$userId = $this->requireAuthentication();
+
+		$email = trim($_POST['email'] ?? '');
+
+		if ($email === '')
+		{
+			http_response_code(400);
+			echo 'Email is required.';
+			exit;
+		}
+
+		if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+		{
+			http_response_code(400);
+			echo 'Invalid email address.';
+			exit;
+		}
+
+		$database = new Database();
+		$pdo = $database->getConnection();
+
+		$stmt = $pdo->prepare(
+			'SELECT id
+			FROM users
+			WHERE email = :email
+			AND id != :id'
+		);
+
+		$stmt->execute([
+			'email' => $email,
+			'id' => $userId
+		]);
+
+		if ($stmt->fetch() !== false)
+		{
+			http_response_code(409);
+			echo 'Email address already exists.';
+			exit;
+		}
+
+		$verificationToken = bin2hex(random_bytes(32));
+
+		$verificationExpiresAt = date(
+			'Y-m-d H:i:s',
+			time() + 86400
+		);
+
+		$stmt = $pdo->prepare(
+			'UPDATE users
+			SET email = :email,
+			email_verified = FALSE,
+			verification_token = :verification_token,
+			verification_expires_at = :verification_expires_at
+			WHERE id = :id'
+		);
+
+		$stmt->execute([
+			'email' => $email,
+			'verification_token' => $verificationToken,
+			'verification_expires_at' => $verificationExpiresAt,
+			'id' => $userId
+		]);
+
+		$verificationUrl =
+			'http://localhost:8080/verify?token='
+			. urlencode($verificationToken);
+
+		echo '<h1>Email address updated.</h1>';
+
+		echo '<p>';
+		echo 'Please verify your new email address.';
+		echo '</p>';
+
+		echo '<p>';
+		echo '<a href="'
+			. htmlspecialchars(
+			$verificationUrl,
+			ENT_QUOTES,
+			'UTF-8'
+			)
+			. '">';
+		echo 'Verify your new email address';
+		echo '</a>';
+		echo '</p>';
+
+		echo '<p>';
+		echo '<a href="/profile">Back to profile</a>';
+		echo '</p>';
+
+		exit;
+	}
+
+	public function updatePassword(): void
+	{
+		$userId = $this->requireAuthentication();
+
+		$currentPassword = $_POST['current_password'] ?? '';
+		$newPassword = $_POST['password'] ?? '';
+		$passwordConfirmation = $_POST['password_confirmation'] ?? '';
+
+		if ($currentPassword === '')
+		{
+			http_response_code(400);
+			echo 'Current password is required.';
+			exit;
+		}
+
+		if ($newPassword === '')
+		{
+			http_response_code(400);
+			echo 'New password is required.';
+			exit;
+		}
+
+		if (strlen($newPassword) < 8)
+		{
+			http_response_code(400);
+			echo 'New password must contain at least 8 characters.';
+			exit;
+		}
+
+		if ($newPassword !== $passwordConfirmation)
+		{
+			http_response_code(400);
+			echo 'Passwords do not match.';
+			exit;
+		}
+
+		$database = new Database();
+		$pdo = $database->getConnection();
+
+		$stmt = $pdo->prepare(
+			'SELECT password
+			FROM users
+			WHERE id = :id'
+		);
+
+		$stmt->execute([
+			'id' => $userId
+		]);
+
+		$user = $stmt->fetch();
+
+		if ($user === false)
+		{
+			http_response_code(404);
+			echo 'User not found.';
+			exit;
+		}
+
+		if (!password_verify($currentPassword, $user['password']))
+		{
+			http_response_code(401);
+			echo 'Current password is incorrect.';
+			exit;
+		}
+
+		$passwordHash = password_hash(
+			$newPassword,
+			PASSWORD_DEFAULT
+		);
+
+		$stmt = $pdo->prepare(
+			'UPDATE users
+			SET password = :password
+			WHERE id = :id'
+		);
+
+		$stmt->execute([
+			'password' => $passwordHash,
+			'id' => $userId
+		]);
+
+		header('Location: /profile');
+		exit;
+	}
+
+	private function requireAuthentication(): int //si intentan hacer http://localhost:8080/profile sin estar iniciados sesion no puedan
+	{
+		session_start();
+
+		if (!isset($_SESSION['user_id']))
+		{
+			header('Location: /login');
+			exit;
+		}
+
+		return (int) $_SESSION['user_id'];
+	}
+}
+
+==================================================
 ===== ./src/Views/auth/forgot-password.php =====
 ==================================================
 <!DOCTYPE html>
@@ -1281,6 +1630,307 @@ class HomeController
     <script src="/assets/js/main.js"></script>
 
 </body>
+</html>
+
+==================================================
+===== ./src/Views/auth/profile.php =====
+==================================================
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Camagru - Profile</title>
+
+    <link
+        rel="stylesheet"
+        href="/assets/css/style.css"
+    >
+
+</head>
+
+<body>
+
+    <header class="site-header">
+
+        <div class="container">
+
+            <a href="/" class="logo">
+                Camagru
+            </a>
+
+        </div>
+
+    </header>
+
+    <main class="main-content">
+
+        <section class="auth-card">
+
+            <h1>My profile</h1>
+
+            <p class="auth-subtitle">
+                Manage your Camagru account.
+            </p>
+
+
+            <!-- Current account information -->
+
+            <div class="profile-section">
+
+                <h2>Account information</h2>
+
+                <div class="form-group">
+
+                    <label for="current_username">
+                        Current username
+                    </label>
+
+                    <input
+                        type="text"
+                        id="current_username"
+                        value="<?= htmlspecialchars(
+                            $user['username'],
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>"
+                        disabled
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="current_email">
+                        Current email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="current_email"
+                        value="<?= htmlspecialchars(
+                            $user['email'],
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>"
+                        disabled
+                    >
+
+                </div>
+
+                <p class="profile-status">
+
+                    Email status:
+
+                    <?php if ($user['email_verified']): ?>
+
+                        <strong>Verified</strong>
+
+                    <?php else: ?>
+
+                        <strong>Not verified</strong>
+
+                    <?php endif; ?>
+
+                </p>
+
+            </div>
+
+
+            <!-- Change username -->
+
+            <div class="profile-section">
+
+                <h2>Change username</h2>
+
+                <form
+                    action="/profile/username"
+                    method="POST"
+                    class="auth-form"
+                >
+
+                    <div class="form-group">
+
+                        <label for="username">
+                            New username
+                        </label>
+
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            maxlength="50"
+                            autocomplete="username"
+                            required
+                        >
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        Change username
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- Change email -->
+
+            <div class="profile-section">
+
+                <h2>Change email</h2>
+
+                <form
+                    action="/profile/email"
+                    method="POST"
+                    class="auth-form"
+                >
+
+                    <div class="form-group">
+
+                        <label for="email">
+                            New email
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        Change email
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- Change password -->
+
+            <div class="profile-section">
+
+                <h2>Change password</h2>
+
+                <form
+                    action="/profile/password"
+                    method="POST"
+                    class="auth-form"
+                >
+
+                    <div class="form-group">
+
+                        <label for="current_password">
+                            Current password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="current_password"
+                            name="current_password"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="password">
+                            New password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="password_confirmation">
+                            Confirm new password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password_confirmation"
+                            name="password_confirmation"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        Change password
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <div class="auth-links">
+
+                <p>
+                    <a href="/">
+                        Back to home
+                    </a>
+                </p>
+
+                <p>
+                    <a href="/logout">
+                        Logout
+                    </a>
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+
+        <div class="container">
+
+            <p>
+                &copy; 2026 Camagru
+            </p>
+
+        </div>
+
+    </footer>
+
+</body>
+
 </html>
 
 ==================================================
@@ -1500,6 +2150,10 @@ class HomeController
             <a href="/" class="logo">Camagru</a>
 
             <?php if ($isAuthenticated): ?>
+
+                <a href="/profile">
+                    Profile
+                </a>
 
                 <a href="/logout">
                     Logout

@@ -203,3 +203,30 @@ body {
         font-size: 24px;
     }
 }
+
+/* Profile */
+
+.profile-section {
+    margin-top: 30px;
+    padding-top: 25px;
+
+    border-top: 1px solid #e5e7eb;
+}
+
+.profile-section h2 {
+    margin-bottom: 20px;
+
+    font-size: 20px;
+}
+
+.profile-status {
+    margin-top: 15px;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+.profile-status strong {
+    color: #1f2937;
+}

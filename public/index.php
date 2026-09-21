@@ -81,8 +81,26 @@ if ($path === '/logout' && $method === 'GET')
 
 if ($path === '/profile' && $method === 'GET')
 {
-    $profileController->index();
-    exit;
+	$profileController->index();
+	exit;
+}
+
+if ($path === '/profile/username' && $method === 'POST')
+{
+	$profileController->updateUsername();
+	exit;
+}
+
+if ($path === '/profile/email' && $method === 'POST')
+{
+	$profileController->updateEmail();
+	exit;
+}
+
+if ($path === '/profile/password' && $method === 'POST')
+{
+	$profileController->updatePassword();
+	exit;
 }
 
 http_response_code(404);
