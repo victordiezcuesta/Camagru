@@ -1049,11 +1049,6 @@ class AuthController
 			PASSWORD_DEFAULT
 		);
 
-		if (!password_verify($password, $hash)) //temporal
-		{
-			die('ERROR: generated hash does not match password');
-		}
-
 		$stmt = $pdo->prepare(
 			'UPDATE users
 			SET password = :password,
@@ -1066,30 +1061,6 @@ class AuthController
 			'password' => $passwordHash,
 			'id' => $user['id']
 		]);
-
-		/*temporal*/
-		$check = $pdo->prepare(
-		'SELECT password FROM users WHERE id = :id'
-		);
-
-		$check->execute([
-		'id' => $user['id']
-		]);
-
-		$savedUser = $check->fetch();
-
-		if (!$savedUser)
-		{
-		die('ERROR: user not found after password update');
-		}
-
-		if (!password_verify($password, $savedUser['password']))
-		{
-		die('ERROR: database password does not match new password');
-		}
-
-		/*hasta aqui*/
-
 
 		header('Location: /login');
 		exit;

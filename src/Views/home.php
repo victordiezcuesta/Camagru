@@ -18,6 +18,10 @@
 
             <?php if ($isAuthenticated): ?>
 
+                <a href="/profile">
+                    Profile
+                </a>
+
                 <a href="/logout">
                     Logout
                 </a>
