@@ -15,6 +15,12 @@ if ($path === '/login' && $method === 'GET')
 	exit;
 }
 
+if ($path === '/login' && $method === 'POST')
+{
+	$controller->loginPost();
+	exit;
+}
+
 if ($path === '/register' && $method === 'GET')
 {
 	$controller->register();
