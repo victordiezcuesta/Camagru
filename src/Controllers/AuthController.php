@@ -1,0 +1,96 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../config/Database.php';
+
+class AuthController
+{
+	public function login(): void
+	{
+		require __DIR__ . '/../Views/auth/login.php';
+	}
+
+	public function register(): void
+	{
+		require __DIR__ . '/../Views/auth/register.php';
+	}
+
+	public function registerPost(): void
+	{
+		$username = trim($_POST['username'] ?? ''); //Busca dentro de $_POST el campo llamado username. Si no existe, utiliza ''.
+		$email = trim($_POST['email'] ?? '');
+		$password = $_POST['password'] ?? '';
+
+		$errors = [];
+
+		if ($username === '')
+		{
+			$errors[] = 'Username is required.';
+		}
+
+		if ($email === '')
+		{
+			$errors[] = 'Email is required.';
+		}
+		elseif (!filter_var($email, FILTER_VALIDATE_EMAIL))
+		{
+			$errors[] = 'Invalid email address.';
+		}
+
+		if ($password === '')
+		{
+			$errors[] = 'Password is required.';
+		}
+		elseif (strlen($password) < 8)
+		{
+			$errors[] = 'Password must contain at least 8 characters.';
+		}
+
+		if (!empty($errors))
+		{
+			http_response_code(400);
+
+			foreach ($errors as $error)
+			{
+				echo '<p>' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</p>';
+			}
+
+			exit;
+		}
+
+		$database = new Database();
+		$pdo = $database->getConnection();
+
+		$stmt = $pdo->prepare(
+			'SELECT id FROM users WHERE username = :username OR email = :email'
+		);
+
+		$stmt->execute([
+			'username' => $username,
+			'email' => $email
+		]);
+
+		if ($stmt->fetch() !== false)
+		{
+			http_response_code(409);
+			echo 'Username or email already exists.';
+			exit;
+		}
+
+		$passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+		$stmt = $pdo->prepare(
+			'INSERT INTO users (username, email, password)
+			VALUES (:username, :email, :password)'
+		);
+
+		$stmt->execute([
+			'username' => $username,
+			'email' => $email,
+			'password' => $passwordHash
+		]);
+
+		echo 'Registration successful.';
+	}
+}

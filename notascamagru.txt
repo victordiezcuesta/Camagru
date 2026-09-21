@@ -1,0 +1,684 @@
+==================== TREE ====================
+.
+├── actualizar.sh
+├── database
+│   └── schema.sql
+├── docker
+│   ├── nginx
+│   │   └── default.conf
+│   └── php
+│       └── Dockerfile
+├── docker-compose.yml
+├── Makefile
+├── notascamagru.txt
+├── public
+│   ├── assets
+│   │   ├── css
+│   │   │   └── style.css
+│   │   └── js
+│   └── index.php
+└── src
+    ├── config
+    │   └── Database.php
+    ├── Controllers
+    │   └── AuthController.php
+    └── Views
+        └── auth
+            ├── login.php
+            └── register.php
+
+14 directories, 13 files
+
+==================== ARCHIVOS ====================
+
+==================================================
+===== ./database/schema.sql =====
+==================================================
+CREATE TABLE users (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	/*id nombre variable
+		INT tipo variable
+		Unsigned sin simbolo
+		auto_increment, que se va incrementando el valor solo es decir id=1 id=2 ...
+		PRIMARY KEY no puede haber dos id con el mismo valor
+	*/
+    username VARCHAR(50) NOT NULL UNIQUE,
+      /* VARCHAR(50) cadena de hasta 50 caracteres 
+		NOT NULL que el campo es obligatoria
+		UNIQUE que tiene que ser unico, no puede haber dos username iguales
+	*/
+
+    email VARCHAR(255) NOT NULL UNIQUE,
+
+    password VARCHAR(255) NOT NULL,
+
+    email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    /* un booleano que por defecto es false*/
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+==================================================
+===== ./docker-compose.yml =====
+==================================================
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: camagru_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public:/var/www/html/public
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
+    networks:
+      - camagru_network
+
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: camagru_php
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./public:/var/www/html/public
+      - ./src:/var/www/html/src
+    depends_on:
+      - db
+    networks:
+      - camagru_network
+
+  db:
+    image: mariadb:11
+    container_name: camagru_db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    networks:
+      - camagru_network
+
+volumes:
+  db_data:
+
+networks:
+  camagru_network:
+
+==================================================
+===== ./docker/nginx/default.conf =====
+==================================================
+server {
+    listen 80;
+    server_name localhost;
+
+    root /var/www/html/public;
+    index index.php index.html;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass php:9000;
+    }
+
+    location ~ /\. {
+        deny all;
+    }
+}
+
+==================================================
+===== ./docker/php/Dockerfile =====
+==================================================
+FROM php:8.3-fpm
+
+RUN docker-php-ext-install pdo pdo_mysql
+
+WORKDIR /var/www/html
+
+==================================================
+===== ./.env =====
+==================================================
+DB_HOST=db
+DB_PORT=3306
+DB_NAME=camagru
+DB_USER=camagru
+DB_PASSWORD=camagru_password
+DB_ROOT_PASSWORD=root_password
+
+==================================================
+===== ./.env.example =====
+==================================================
+DB_HOST=db
+DB_PORT=3306
+DB_NAME=camagru
+DB_USER=camagru
+DB_PASSWORD=camagru_password
+DB_ROOT_PASSWORD=root_password
+
+==================================================
+===== ./Makefile =====
+==================================================
+NAME = camagru
+
+all:
+	docker compose up -d --build
+
+down:
+	docker compose down
+
+logs:
+	docker compose logs -f
+
+clean:
+	docker compose down --remove-orphans
+
+fclean:
+	docker compose down -v --remove-orphans
+
+re:
+	$(MAKE) fclean
+	$(MAKE) all
+
+==================================================
+===== ./public/assets/css/style.css =====
+==================================================
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: #f4f5f7;
+    color: #1f2937;
+}
+
+.container {
+    width: min(100% - 40px, 1100px);
+    margin: 0 auto;
+}
+
+/* Header */
+
+.site-header {
+    height: 70px;
+
+    display: flex;
+    align-items: center;
+
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.logo {
+    color: #111827;
+    text-decoration: none;
+
+    font-size: 24px;
+    font-weight: 700;
+}
+
+/* Main */
+
+.main-content {
+    flex: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 40px 20px;
+}
+
+/* Login card */
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+
+    padding: 40px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.auth-card h1 {
+    margin-bottom: 10px;
+
+    font-size: 28px;
+    line-height: 1.2;
+
+    text-align: center;
+}
+
+.auth-subtitle {
+    margin-bottom: 30px;
+
+    color: #6b7280;
+
+    text-align: center;
+}
+
+/* Form */
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+
+    padding: 12px 14px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+
+    font-size: 16px;
+
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: #2563eb;
+}
+
+/* Button */
+
+.btn-primary {
+    width: 100%;
+
+    padding: 13px 20px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: #2563eb;
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+}
+
+/* Links */
+
+.auth-links {
+    margin-top: 25px;
+
+    text-align: center;
+
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.auth-links a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+.auth-links p {
+    margin-top: 10px;
+}
+
+/* Footer */
+
+.site-footer {
+    padding: 20px 0;
+
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+
+    color: #6b7280;
+
+    text-align: center;
+    font-size: 13px;
+}
+
+/* Mobile */
+
+@media (max-width: 480px) {
+
+    .container {
+        width: min(100% - 30px, 1100px);
+    }
+
+    .auth-card {
+        padding: 30px 20px;
+    }
+
+    .auth-card h1 {
+        font-size: 24px;
+    }
+}
+
+==================================================
+===== ./public/index.php =====
+==================================================
+<?php
+
+declare(strict_types=1); //"PHP, dentro de este archivo, intenta ser estricto con los tipos que he declarado."
+
+require_once __DIR__ . '/../src/Controllers/AuthController.php'; //Carga y ejecuta este otro archivo PHP, pero asegúrate de cargarlo una sola vez. parecido a los .hpp y .h pero sin serlo
+
+$controller = new AuthController();
+
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); //$_SERVER['REQUEST_URI'] contiene la petición realizada por el navegador. y si tiene /register?foo=bar se quedaria solo /register
+$method = $_SERVER['REQUEST_METHOD']; //es el method del html es decir el get el set el post, ...
+
+if ($path === '/login' && $method === 'GET')
+{
+    $controller->login();
+    exit;
+}
+
+if ($path === '/register' && $method === 'GET')
+{
+    $controller->register();
+    exit;
+}
+
+http_response_code(404);
+
+echo '404 - Page not found';
+
+==================================================
+===== ./src/config/Database.php =====
+==================================================
+<?php
+
+declare(strict_types=1);
+
+/*PDO ES QUIEN HACE LA COMUNICACION ENTRE PHP Y MARIADB, ES COMO EL TRADUCTOR ENTRE PHP Y MARIA DB
+PDO es una interfaz de acceso a bases de datos
+*/
+
+class Database
+{
+    private PDO $connection; 
+    /*$connection debe contener un objeto de tipo PDO*/
+
+    public function __construct()
+    {
+        $host = getenv('DB_HOST');
+        $port = getenv('DB_PORT');
+        $name = getenv('DB_NAME');
+        $user = getenv('DB_USER');
+        $password = getenv('DB_PASSWORD');
+
+        $dsn = "mysql:host=$host;port=$port;dbname=$name;charset=utf8mb4";
+	  /*Data Source Name
+	  	Es la información que PDO necesita para saber a qué base de datos conectarse
+		el host, el puerto, el nombre
+		charset=utf8mb4 es el conjunto de caracteres que permite mariadb
+		*/
+
+        $this->connection = new PDO(
+		$dsn,
+		$user,
+		$password,
+		[
+			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, //Si ocurre un error con la base de datos, lanza una excepción.
+			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, //Cuando obtenga datos de MariaDB, quiero recibirlos como arrays asociativos.
+			PDO::ATTR_EMULATE_PREPARES => false //PDO que no emule los prepared statements, sino que utilice prepared statements reales cuando el driver lo soporte.
+		]
+	);
+    }
+
+    public function getConnection(): PDO
+    {
+        return $this->connection;
+    }
+}
+
+==================================================
+===== ./src/Controllers/AuthController.php =====
+==================================================
+<?php
+
+declare(strict_types=1);
+
+class AuthController
+{
+	public function login(): void
+	{
+		require __DIR__ . '/../Views/auth/login.php';
+	}
+
+	public function register(): void
+	{
+	require __DIR__ . '/../Views/auth/register.php';
+	}
+}
+
+==================================================
+===== ./src/Views/auth/login.php =====
+==================================================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Camagru - Login</title>
+
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div class="container">
+            <a href="/" class="logo">Camagru</a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="auth-card">
+
+            <h1>Welcome back</h1>
+
+            <p class="auth-subtitle">
+                Sign in to continue to Camagru.
+            </p>
+
+            <form action="/login" method="POST" class="auth-form">
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    Login
+                </button>
+
+            </form>
+
+            <div class="auth-links">
+                <a href="/forgot-password">
+                    Forgot your password?
+                </a>
+
+                <p>
+                    Don't have an account?
+                    <a href="/register">Create an account</a>
+                </p>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 Camagru</p>
+        </div>
+    </footer>
+
+    <script src="/assets/js/main.js"></script>
+
+</body>
+</html>
+
+==================================================
+===== ./src/Views/auth/register.php =====
+==================================================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Camagru - Register</title>
+
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div class="container">
+            <a href="/" class="logo">Camagru</a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="auth-card">
+
+            <h1>Create account</h1>
+
+            <p class="auth-subtitle">
+                Create your Camagru account.
+            </p>
+
+            <form action="/register" method="POST" class="auth-form">
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        autocomplete="new-password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    Create account
+                </button>
+
+            </form>
+
+            <div class="auth-links">
+                <p>
+                    Already have an account?
+                    <a href="/login">Login</a>
+                </p>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 Camagru</p>
+        </div>
+    </footer>
+
+</body>
+</html>
