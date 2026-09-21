@@ -166,18 +166,43 @@ class AuthController
 
 		$verificationToken = bin2hex(random_bytes(32)); //genereamos un token a voleo
 
+		$verificationExpiresAt = date(
+			'Y-m-d H:i:s',
+			time() + 86400
+		);
+
 		$stmt = $pdo->prepare(
-			'INSERT INTO users (username, email, password)
-			VALUES (:username, :email, :password)'
+			'INSERT INTO users (
+				username,
+				email,
+				password,
+				verification_token,
+				verification_expires_at
+			)
+			VALUES (
+				:username,
+				:email,
+				:password,
+				:verification_token,
+				:verification_expires_at
+			)'
 		);
 
 		$stmt->execute([
 			'username' => $username,
 			'email' => $email,
-			'password' => $passwordHash
+			'password' => $passwordHash,
+			'verification_token' => $verificationToken,
+			'verification_expires_at' => $verificationExpiresAt
 		]);
 
-		echo 'Registration successful.';
+		$verificationUrl = 'http://localhost:8080/verify?token=' . urlencode($verificationToken);
+
+		echo '<h1>Registration successful.</h1>';
+		echo '<p>Please verify your email address.</p>';
+		echo '<p><a href="' . htmlspecialchars($verificationUrl, ENT_QUOTES, 'UTF-8') . '">';
+		echo 'Verify your account';
+		echo '</a></p>';
 	}
 
 	public function verify(): void
@@ -191,11 +216,52 @@ class AuthController
 			exit;
 		}
 
-		// Buscar token en la base de datos
-		// Comprobar expiración
-		// Marcar email_verified = TRUE
-		// Eliminar token
-		// Redirigir a login
+		$database = new Database();
+		$pdo = $database->getConnection();
+
+		$stmt = $pdo->prepare(
+			'SELECT id, verification_expires_at
+			FROM users
+			WHERE verification_token = :token'
+		);
+
+		$stmt->execute([
+			'token' => $token
+		]);
+
+		$user = $stmt->fetch();
+
+		if ($user === false)
+		{
+			http_response_code(400);
+			echo 'Invalid verification link.';
+			exit;
+		}
+
+		if (
+			$user['verification_expires_at'] === null
+			|| strtotime($user['verification_expires_at']) < time()
+		)
+		{
+			http_response_code(400);
+			echo 'Verification link has expired.';
+			exit;
+		}
+
+		$stmt = $pdo->prepare(
+			'UPDATE users
+			SET email_verified = TRUE,
+				verification_token = NULL,
+				verification_expires_at = NULL
+			WHERE id = :id'
+		);
+
+		$stmt->execute([
+			'id' => $user['id']
+		]);
+
+		header('Location: /login');
+		exit;
 	}
 
 	public function logout(): void
