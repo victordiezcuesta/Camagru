@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../Security/Csrf.php';
 require_once __DIR__ . '/../Security/Session.php';
 require_once __DIR__ . '/../Security/PasswordValidator.php';
+require_once __DIR__ . '/../Services/Mailer.php';
 
 class ProfileController
 {
