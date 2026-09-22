@@ -21,7 +21,7 @@ class AuthController
 
 	public function loginPost(): void
 	{
-		if (!Csrf::validate($_POST['csrf_token'] ?? null))
+		if (!Csrf::validate($_POST['csrf_token'] ?? null)) //$_POST es un array especial que PHP crea automáticamente cuando recibe datos enviados mediante el método HTTP POST
 		{
 			http_response_code(403);
 			echo 'Invalid CSRF token.';

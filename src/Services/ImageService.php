@@ -7,6 +7,8 @@ class ImageService
 	private const UPLOAD_DIRECTORY = __DIR__ . '/../../public/uploads/';
 	private const OVERLAY_DIRECTORY = __DIR__ . '/../../public/assets/overlays/'; //__DIR__ representa la carpeta donde esta el php
 	private const MAX_FILE_SIZE = 5 * 1024 * 1024; // maximo 5 MB
+	private const MAX_IMAGE_WIDTH = 1920; //limitas el ancho y el alto de la imagen por el tema de la memoria del gd
+	private const MAX_IMAGE_HEIGHT = 1440;
 
 	private const ALLOWED_MIME_TYPES = [
 		'image/jpeg' => 'jpg',
@@ -41,46 +43,53 @@ class ImageService
 		if ($imageInfo === false)
 			throw new RuntimeException('Invalid image.');
 
-		if (!isset(self::ALLOWED_OVERLAYS[$overlay]))
+		if ($overlay !== '' && !isset(self::ALLOWED_OVERLAYS[$overlay]))
 			throw new RuntimeException('Invalid overlay.');
 
-		$overlayPath = self::OVERLAY_DIRECTORY . self::ALLOWED_OVERLAYS[$overlay]; //ruta exacta de los overlays
-
-		if (!is_file($overlayPath))
-			throw new RuntimeException('Overlay not found.');
-
 		$sourceImage = $this->createImageFromFile($file['tmp_name'], $mimeType);
+		$sourceImage = $this->resizeImageIfNeeded($sourceImage); //redimensionamos el tamaño de la imagen si fuera necesario
 
-		$overlayImage = imagecreatefrompng($overlayPath); //Lee el overlay y crea en memoria una representación de esa imagen que PHP puede modificar y sea transparente
-
-		if ($overlayImage === false)
+		if ($overlay !== '')
 		{
-			imagedestroy($sourceImage); //liberamos la memoria de la funcion imagecreatefrompng
-			throw new RuntimeException('Unable to load overlay.');
+			$overlayPath = self::OVERLAY_DIRECTORY . self::ALLOWED_OVERLAYS[$overlay]; //ruta exacta de los overlays
+
+			if (!is_file($overlayPath))
+			{
+				imagedestroy($sourceImage);
+				throw new RuntimeException('Overlay not found.');
+			}
+
+			$overlayImage = imagecreatefrompng($overlayPath); //Lee el overlay y crea en memoria una representación de esa imagen que PHP puede modificar y sea transparente
+
+			if ($overlayImage === false)
+			{
+				imagedestroy($sourceImage); //liberamos la memoria de la funcion imagecreatefrompng
+				throw new RuntimeException('Unable to load overlay.');
+			}
+		
+			$width = imagesx($sourceImage); //calcula los tamaños de las fotos
+			$height = imagesy($sourceImage);
+
+			$overlayWidth = imagesx($overlayImage);
+			$overlayHeight = imagesy($overlayImage);
+
+			$resizedOverlay = imagecreatetruecolor($width, $height); //creamos una imagen nueva de overlay vacia del tamaño de la foto principal
+
+			if ($resizedOverlay === false)
+			{
+				imagedestroy($sourceImage);
+				imagedestroy($overlayImage);
+				throw new RuntimeException('Unable to create image.');
+			}
+
+			imagealphablending($resizedOverlay, false); //Vamos a trabajar con el canal transparencia de forma explícita
+			imagesavealpha($resizedOverlay, true); //Conserva la información de transparencia
+			$transparent = imagecolorallocatealpha($resizedOverlay, 0, 0, 0, 127); //creamos un color transparente, 0 0 0 RGB, 127=transparencia máxima en GD
+			imagefill($resizedOverlay, 0, 0, $transparent); //rellena toda la imagen con ese color transparente
+			imagecopyresampled($resizedOverlay, $overlayImage, 0, 0, 0, 0, $width, $height, $overlayWidth, $overlayHeight); //Redimensionamos el overlay con el otro overlay copia
+			imagealphablending($sourceImage, true); //le decimos a GD que cuando coloquemos el overlay sobre la fotografía, debe respetar la transparencia
+			imagecopy($sourceImage, $resizedOverlay, 0, 0, 0, 0, $width, $height); //ponemos el overlay redimensionado encima de la fotografia principal
 		}
-
-		$width = imagesx($sourceImage); //calcula los tamaños de las fotos
-		$height = imagesy($sourceImage);
-
-		$overlayWidth = imagesx($overlayImage);
-		$overlayHeight = imagesy($overlayImage);
-
-		$resizedOverlay = imagecreatetruecolor($width, $height); //creamos una imagen nueva de overlay vacia del tamaño de la foto principal
-
-		if ($resizedOverlay === false)
-		{
-			imagedestroy($sourceImage);
-			imagedestroy($overlayImage);
-			throw new RuntimeException('Unable to create image.');
-		}
-
-		imagealphablending($resizedOverlay, false); //Vamos a trabajar con el canal transparencia de forma explícita
-		imagesavealpha($resizedOverlay, true); //Conserva la información de transparencia
-		$transparent = imagecolorallocatealpha($resizedOverlay, 0, 0, 0, 127); //creamos un color transparente, 0 0 0 RGB, 127=transparencia máxima en GD
-		imagefill($resizedOverlay, 0, 0, $transparent); //rellena toda la imagen con ese color transparente
-		imagecopyresampled($resizedOverlay, $overlayImage, 0, 0, 0, 0, $width, $height, $overlayWidth, $overlayHeight); //Redimensionamos el overlay con el otro overlay copia
-		imagealphablending($sourceImage, true); //le decimos a GD que cuando coloquemos el overlay sobre la fotografía, debe respetar la transparencia
-		imagecopy($sourceImage, $resizedOverlay, 0, 0, 0, 0, $width, $height); //ponemos el overlay redimensionado encima de la fotografia principal
 
 		$filename = bin2hex(random_bytes(32)) . '.jpg'; //cambiamos el nombre a la foto por si suben dos fotos con el mismo nobre
 
@@ -89,15 +98,21 @@ class ImageService
 		if (!imagejpeg($sourceImage, $destination, 90)) //convierte la imagen final en memoria en un archivo JPEG | 90=calidad JPEG
 		{
 			imagedestroy($sourceImage);
-			imagedestroy($overlayImage);
-			imagedestroy($resizedOverlay);
+			if ($overlay !== '')
+			{
+				imagedestroy($overlayImage);
+				imagedestroy($resizedOverlay);
+			}
 
 			throw new RuntimeException('Unable to save image.');
 		}
 
 		imagedestroy($sourceImage);
-		imagedestroy($overlayImage);
-		imagedestroy($resizedOverlay);
+		if ($overlay !== '')
+		{
+			imagedestroy($overlayImage);
+			imagedestroy($resizedOverlay);
+		}
 
 		return $filename;
 	}
@@ -113,5 +128,31 @@ class ImageService
 			throw new RuntimeException('Unable to load image.');
 
 		return $image;
+	}
+
+	private function resizeImageIfNeeded($image)
+	{
+		$width = imagesx($image);
+		$height = imagesy($image);
+
+		if ($width <= self::MAX_IMAGE_WIDTH && $height <= self::MAX_IMAGE_HEIGHT)
+			return $image;
+
+		$scale = min(self::MAX_IMAGE_WIDTH / $width, self::MAX_IMAGE_HEIGHT / $height);
+		$newWidth = (int) round($width * $scale);
+		$newHeight = (int) round($height * $scale);
+
+		$resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+
+		if ($resizedImage === false)
+		{
+			imagedestroy($image);
+			throw new RuntimeException('Unable to resize image.');
+		}
+
+		imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+		imagedestroy($image);
+
+		return $resizedImage;
 	}
 }

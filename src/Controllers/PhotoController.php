@@ -40,18 +40,26 @@ class PhotoController
 			exit;
 		}
 
-		if (!isset($_FILES['image']))
+		if (!isset($_FILES['image'])) //$_FILES =Es un array especial de PHP con información sobre el archivo
 		{
 			http_response_code(400);
 			echo 'Image is required.';
 			exit;
 		}
 
+		$overlay = $_POST['overlay'] ?? ''; //busca el overlay seleccionado desde el js y el html
+		/*if ($overlay === '')
+		{
+			http_response_code(400);
+			echo 'Overlay is required.';
+			exit;
+		}*/
+
 		$imageService = new ImageService();
 
 		try
 		{
-			$filename = $imageService->saveUploadedImage($_FILES['image']);
+			$filename = $imageService->saveUploadedImage($_FILES['image'], $overlay);
 		}
 		catch (RuntimeException $exception)
 		{
