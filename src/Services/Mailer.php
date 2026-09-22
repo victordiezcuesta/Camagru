@@ -219,4 +219,19 @@ class Mailer
 
 		return $this->send($email, $subject, $message);
 	}
+
+	public function sendCommentNotificationEmail(string $email, string $username, string $commenterUsername, string $imageUrl, string $comment): bool
+	{
+		$subject = 'Camagru - New comment on your photo';
+		$message =
+			"Hello " . $username . ",\n\n"
+			. $commenterUsername . " commented on your photo.\n\n"
+			. "Comment:\n"
+			. $comment . "\n\n"
+			. "View your gallery:\n"
+			. $imageUrl . "\n\n"
+			. "Camagru";
+
+		return $this->send($email, $subject, $message);
+	}
 }

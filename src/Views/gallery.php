@@ -107,6 +107,175 @@
 
                             </div>
 
+                            <div class="gallery-card-actions">
+
+                                <?php if (isset($_SESSION['user_id'])): ?>
+
+                                    <form
+                                        action="/gallery/like"
+                                        method="POST"
+                                        class="like-form"
+                                    >
+
+                                        <input
+                                            type="hidden"
+                                            name="csrf_token"
+                                            value="<?= htmlspecialchars(
+                                                $csrfToken,
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="image_id"
+                                            value="<?= (int) $image['id'] ?>"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="page"
+                                            value="<?= (int) $page ?>"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="like-button <?= $image['user_liked'] ? 'liked' : '' ?>"
+                                        >
+                                            <?= $image['user_liked'] ? 'Unlike' : 'Like' ?>
+                                            (<?= (int) $image['like_count'] ?>)
+                                        </button>
+
+                                    </form>
+
+                                <?php else: ?>
+
+                                    <p class="profile-status">
+                                        Likes:
+                                        <strong>
+                                            <?= (int) $image['like_count'] ?>
+                                        </strong>
+                                    </p>
+
+                                <?php endif; ?>
+
+                            </div>
+
+                            <div class="comments-section">
+
+                                <h3>
+                                    Comments
+                                </h3>
+
+                                <?php if (empty($image['comments'])): ?>
+
+                                    <p class="profile-status">
+                                        No comments yet.
+                                    </p>
+
+                                <?php else: ?>
+
+                                    <div class="comments-list">
+
+                                        <?php foreach ($image['comments'] as $comment): ?>
+
+                                            <div class="comment">
+
+                                                <p>
+                                                    <strong>
+                                                        <?= htmlspecialchars(
+                                                            $comment['username'],
+                                                            ENT_QUOTES,
+                                                            'UTF-8'
+                                                        ) ?>
+                                                    </strong>
+                                                </p>
+
+                                                <p>
+                                                    <?= nl2br(
+                                                        htmlspecialchars(
+                                                            $comment['content'],
+                                                            ENT_QUOTES,
+                                                            'UTF-8'
+                                                        )
+                                                    ) ?>
+                                                </p>
+
+                                                <p class="profile-status">
+                                                    <?= htmlspecialchars(
+                                                        $comment['created_at'],
+                                                        ENT_QUOTES,
+                                                        'UTF-8'
+                                                    ) ?>
+                                                </p>
+
+                                            </div>
+
+                                        <?php endforeach; ?>
+
+                                    </div>
+
+                                <?php endif; ?>
+
+                                <?php if (isset($_SESSION['user_id'])): ?>
+
+                                    <form
+                                        action="/gallery/comment"
+                                        method="POST"
+                                        class="comment-form"
+                                    >
+
+                                        <input
+                                            type="hidden"
+                                            name="csrf_token"
+                                            value="<?= htmlspecialchars(
+                                                $csrfToken,
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="image_id"
+                                            value="<?= (int) $image['id'] ?>"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="page"
+                                            value="<?= (int) $page ?>"
+                                        >
+
+                                        <div class="form-group">
+
+                                            <label for="comment-<?= (int) $image['id'] ?>">
+                                                Add a comment
+                                            </label>
+
+                                            <textarea
+                                                id="comment-<?= (int) $image['id'] ?>"
+                                                name="content"
+                                                maxlength="1000"
+                                                required
+                                            ></textarea>
+
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            class="btn-primary"
+                                        >
+                                            Comment
+                                        </button>
+
+                                    </form>
+
+                                <?php endif; ?>
+
+                            </div>
+
                         </article>
 
                     <?php endforeach; ?>

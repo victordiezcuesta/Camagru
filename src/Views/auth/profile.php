@@ -274,6 +274,58 @@
 
             </div>
 
+            <!-- Comment notifications -->
+            <div class="profile-section">
+
+                <h2>Comment notifications</h2>
+
+                <p class="profile-status">
+                    Receive an email when another user comments on one of your photos.
+                </p>
+
+                <form
+                    action="/profile/comment-notifications"
+                    method="POST"
+                    class="auth-form"
+                >
+
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= htmlspecialchars(
+                            $csrfToken,
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>"
+                    >
+
+                    <div class="notification-option">
+
+                        <input
+                            type="checkbox"
+                            id="comment_notifications"
+                            name="comment_notifications"
+                            value="1"
+                            <?= $user['comment_notifications'] ? 'checked' : '' ?>
+                        >
+
+                        <label for="comment_notifications">
+                            Send me an email when someone comments on my photos.
+                        </label>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        Save notification settings
+                    </button>
+
+                </form>
+
+            </div>
+
             <div class="auth-links">
 
                 <p>

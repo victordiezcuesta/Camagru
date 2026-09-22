@@ -7,12 +7,14 @@ require_once __DIR__ . '/../src/Controllers/HomeController.php';
 require_once __DIR__ . '/../src/Controllers/ProfileController.php';
 require_once __DIR__ . '/../src/Controllers/GalleryController.php';
 require_once __DIR__ . '/../src/Controllers/PhotoController.php';
+require_once __DIR__ . '/../src/Controllers/GalleryInteractionController.php';
 
 $controller = new AuthController();
 $homeController = new HomeController();
 $profileController = new ProfileController();
 $galleryController = new GalleryController();
 $photoController = new PhotoController();
+$galleryInteractionController = new GalleryInteractionController();
 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); //$_SERVER['REQUEST_URI'] contiene la petición realizada por el navegador. y si tiene /register?foo=bar se quedaria solo /register
 $method = $_SERVER['REQUEST_METHOD']; //es el method del html es decir el get el set el post, ...
@@ -107,6 +109,12 @@ if ($path === '/profile/password' && $method === 'POST')
 	exit;
 }
 
+if ($path === '/profile/comment-notifications' && $method === 'POST')
+{
+	$profileController->updateCommentNotifications();
+	exit;
+}
+
 if ($path === '/gallery' && $method === 'GET')
 {
 	$galleryController->index();
@@ -122,6 +130,18 @@ if ($path === '/photo/create' && $method === 'GET')
 if ($path === '/photo' && $method === 'POST')
 {
 	$photoController->store();
+	exit;
+}
+
+if ($path === '/gallery/like' && $method === 'POST')
+{
+	$galleryInteractionController->toggleLike();
+	exit;
+}
+
+if ($path === '/gallery/comment' && $method === 'POST')
+{
+	$galleryInteractionController->addComment();
 	exit;
 }
 

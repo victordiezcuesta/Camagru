@@ -30,7 +30,11 @@ class ProfileController
 		$pdo = $database->getConnection();
 
 		$stmt = $pdo->prepare(
-			'SELECT username, email, email_verified
+			'SELECT
+				username,
+				email,
+				email_verified,
+				comment_notifications
 			FROM users
 			WHERE id = :id'
 		);
@@ -343,6 +347,37 @@ class ProfileController
 
 		$stmt->execute([
 			'password' => $passwordHash,
+			'id' => $_SESSION['user_id']
+		]);
+
+		header('Location: /profile');
+		exit;
+	}
+
+	public function updateCommentNotifications(): void
+	{
+		$this->requireAuthentication();
+
+		if (!Csrf::validate($_POST['csrf_token'] ?? null))
+		{
+			http_response_code(403);
+			echo 'Invalid CSRF token.';
+			exit;
+		}
+
+		$enabled = isset($_POST['comment_notifications']) && $_POST['comment_notifications'] === '1';
+
+		$database = new Database();
+		$pdo = $database->getConnection();
+
+		$stmt = $pdo->prepare(
+			'UPDATE users
+			SET comment_notifications = :comment_notifications
+			WHERE id = :id'
+		);
+
+		$stmt->execute([
+			'comment_notifications' => $enabled ? 1 : 0,
 			'id' => $_SESSION['user_id']
 		]);
 
