@@ -1,9 +1,7 @@
 NAME = camagru
 
-export UID := $(shell id -u)
-export GID := $(shell id -g)
-
 all:
+	chmod 777 public/uploads
 	docker compose up -d --build
 
 down:

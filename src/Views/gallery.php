@@ -113,6 +113,48 @@
 
                 </div>
 
+                <?php if ($totalPages > 1): ?>
+
+                    <nav class="pagination" aria-label="Gallery pages">
+
+                        <?php if ($page > 1): ?>
+
+                            <a href="/gallery?page=<?= $page - 1 ?>">
+                                Previous
+                            </a>
+
+                        <?php endif; ?>
+
+                        <?php for ($pageNumber = 1; $pageNumber <= $totalPages; $pageNumber++): ?>
+
+                            <?php if ($pageNumber === $page): ?>
+
+                                <strong>
+                                    <?= $pageNumber ?>
+                                </strong>
+
+                            <?php else: ?>
+
+                                <a href="/gallery?page=<?= $pageNumber ?>">
+                                    <?= $pageNumber ?>
+                                </a>
+
+                            <?php endif; ?>
+
+                        <?php endfor; ?>
+
+                        <?php if ($page < $totalPages): ?>
+
+                            <a href="/gallery?page=<?= $page + 1 ?>">
+                                Next
+                            </a>
+
+                        <?php endif; ?>
+
+                    </nav>
+
+                <?php endif; ?>
+
             <?php endif; ?>
 
         </section>

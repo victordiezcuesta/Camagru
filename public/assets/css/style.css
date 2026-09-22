@@ -271,3 +271,44 @@ body {
 .gallery-card-info p {
     line-height: 1.5;
 }
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    margin-top: 35px;
+}
+
+.pagination a,
+.pagination strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 40px;
+    height: 40px;
+
+    padding: 0 12px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #1f2937;
+
+    text-decoration: none;
+}
+
+.pagination a:hover {
+    background: #f3f4f6;
+}
+
+.pagination strong {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}

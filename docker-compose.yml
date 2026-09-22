@@ -17,7 +17,6 @@ services:
       context: .
       dockerfile: docker/php/Dockerfile
     container_name: camagru_php
-    user: "${UID}:${GID}"
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
