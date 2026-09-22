@@ -6,6 +6,7 @@
 
     find . -type f \
         ! -path './libs/*' \
+        ! -path './public/uploads/*' \
         ! -path './.git/*' \
         ! -name 'notascamagru.txt' \
         ! -name '.gitignore' \

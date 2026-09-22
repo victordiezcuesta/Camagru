@@ -1,5 +1,8 @@
 NAME = camagru
 
+export UID := $(shell id -u)
+export GID := $(shell id -g)
+
 all:
 	docker compose up -d --build
 
@@ -14,7 +17,10 @@ clean:
 
 fclean:
 	docker compose down -v --remove-orphans
-
+	docker run --rm \
+			-v "$(PWD)/public/uploads:/uploads" \
+			alpine:latest \
+			sh -c "find /uploads -type f ! -name '.gitkeep' -delete"
 re:
 	$(MAKE) fclean
 	$(MAKE) all

@@ -5,10 +5,14 @@ declare(strict_types=1); //"PHP, dentro de este archivo, intenta ser estricto co
 require_once __DIR__ . '/../src/Controllers/AuthController.php'; //Carga y ejecuta este otro archivo PHP, pero asegúrate de cargarlo una sola vez. parecido a los .hpp y .h pero sin serlo
 require_once __DIR__ . '/../src/Controllers/HomeController.php';
 require_once __DIR__ . '/../src/Controllers/ProfileController.php';
+require_once __DIR__ . '/../src/Controllers/GalleryController.php';
+require_once __DIR__ . '/../src/Controllers/PhotoController.php';
 
 $controller = new AuthController();
 $homeController = new HomeController();
 $profileController = new ProfileController();
+$galleryController = new GalleryController();
+$photoController = new PhotoController();
 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); //$_SERVER['REQUEST_URI'] contiene la petición realizada por el navegador. y si tiene /register?foo=bar se quedaria solo /register
 $method = $_SERVER['REQUEST_METHOD']; //es el method del html es decir el get el set el post, ...
@@ -100,6 +104,24 @@ if ($path === '/profile/email' && $method === 'POST')
 if ($path === '/profile/password' && $method === 'POST')
 {
 	$profileController->updatePassword();
+	exit;
+}
+
+if ($path === '/gallery' && $method === 'GET')
+{
+	$galleryController->index();
+	exit;
+}
+
+if ($path === '/photo/create' && $method === 'GET')
+{
+	$photoController->create();
+	exit;
+}
+
+if ($path === '/photo' && $method === 'POST')
+{
+	$photoController->store();
 	exit;
 }
 

@@ -16,6 +16,10 @@
 
             <a href="/" class="logo">Camagru</a>
 
+            <a href="/gallery">
+                Gallery
+            </a>
+
             <?php if ($isAuthenticated): ?>
 
                 <a href="/profile">

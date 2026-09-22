@@ -1,0 +1,102 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../Security/Csrf.php';
+require_once __DIR__ . '/../Security/Session.php';
+require_once __DIR__ . '/../Services/ImageService.php';
+
+class PhotoController
+{
+	private function requireAuthentication(): void
+	{
+		Session::start();
+
+		if (!isset($_SESSION['user_id']))
+		{
+			header('Location: /login');
+			exit;
+		}
+	}
+
+	public function create(): void
+	{
+		$this->requireAuthentication();
+
+		$csrfToken = Csrf::token();
+
+		require __DIR__ . '/../Views/photo/create.php';
+	}
+
+	public function store(): void
+	{
+		$this->requireAuthentication();
+
+		if (!Csrf::validate($_POST['csrf_token'] ?? null))
+		{
+			http_response_code(403);
+			echo 'Invalid CSRF token.';
+			exit;
+		}
+
+		if (!isset($_FILES['image']))
+		{
+			http_response_code(400);
+			echo 'Image is required.';
+			exit;
+		}
+
+		$imageService = new ImageService();
+
+		try
+		{
+			$filename = $imageService->saveUploadedImage($_FILES['image']);
+		}
+		catch (RuntimeException $exception)
+		{
+			http_response_code(400);
+			echo htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8');
+			exit;
+		}
+
+		$database = new Database();
+		$pdo = $database->getConnection();
+
+		try
+		{
+			$stmt = $pdo->prepare(
+				'INSERT INTO images (
+					user_id,
+					filename
+				)
+				VALUES (
+					:user_id,
+					:filename
+				)'
+			);
+
+			$stmt->execute([
+				'user_id' => $_SESSION['user_id'],
+				'filename' => $filename
+			]);
+		}
+		catch (Throwable $exception)
+		{
+			$filepath =
+				__DIR__
+				. '/../../public/uploads/'
+				. $filename;
+
+			if (is_file($filepath))
+				unlink($filepath); //borra el archivo que acabamos de subir.
+
+			http_response_code(500);
+			echo 'Unable to save image.';
+			exit;
+		}
+
+		header('Location: /gallery');
+		exit;
+	}
+}
