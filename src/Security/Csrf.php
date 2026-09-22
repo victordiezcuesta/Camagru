@@ -1,5 +1,6 @@
 <?php
-
+//CSRF es paara crear un token aleatorio por cada sesion
+// y luego comparar entre la que tengo yo y la que tiene el navegador 
 declare(strict_types=1);
 
 require_once __DIR__ . '/Session.php';
