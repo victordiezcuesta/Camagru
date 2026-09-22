@@ -171,9 +171,7 @@ class Mailer
 
 	public function sendVerificationEmail(string $email, string $username, string $verificationUrl): bool
 	{
-		$subject =
-			'Camagru - Verify your email address';
-
+		$subject = 'Camagru - Verify your email address';
 		$message =
 			"Hello " . $username . ",\n\n"
 			. "Thank you for registering on Camagru.\n\n"
@@ -189,9 +187,7 @@ class Mailer
 
 	public function sendPasswordResetEmail(string $email, string $username, string $resetUrl): bool
 	{
-		$subject =
-			'Camagru - Password reset';
-
+		$subject = 'Camagru - Password reset';
 		$message =
 			"Hello " . $username . ",\n\n"
 			. "A password reset was requested "
@@ -202,6 +198,23 @@ class Mailer
 			. "This link will expire in 1 hour.\n\n"
 			. "If you did not request a password reset, "
 			. "you can ignore this email.\n\n"
+			. "Camagru";
+
+		return $this->send($email, $subject, $message);
+	}
+
+	public function sendEmailChangeVerificationEmail(string $email, string $username, string $verificationUrl): bool
+	{
+		$subject = 'Camagru - Verify your new email address';
+		$message =
+			"Hello " . $username . ",\n\n"
+			. "Your Camagru email address has been changed.\n\n"
+			. "Please verify your new email address using "
+			. "this link:\n\n"
+			. $verificationUrl . "\n\n"
+			. "This link will expire in 24 hours.\n\n"
+			. "If you did not request this change, "
+			. "please contact the administrator.\n\n"
 			. "Camagru";
 
 		return $this->send($email, $subject, $message);

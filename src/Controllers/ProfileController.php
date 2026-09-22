@@ -157,6 +157,31 @@ class ProfileController
 		$pdo = $database->getConnection();
 
 		$stmt = $pdo->prepare(
+			'SELECT email, username, email_verified
+			FROM users
+			WHERE id = :id'
+		);
+
+		$stmt->execute([
+			'id' => $_SESSION['user_id']
+		]);
+
+		$currentUser = $stmt->fetch();
+		if ($currentUser === false)
+		{
+			http_response_code(404);
+			echo 'User not found.';
+			exit;
+		}
+
+		if ($email === $currentUser['email'])
+		{
+			http_response_code(400);
+			echo 'The new email address must be different.';
+			exit;
+		}
+
+		$stmt = $pdo->prepare(
 			'SELECT id
 			FROM users
 			WHERE email = :email
@@ -176,18 +201,14 @@ class ProfileController
 		}
 
 		$verificationToken = bin2hex(random_bytes(32));
-
-		$verificationExpiresAt = date(
-			'Y-m-d H:i:s',
-			time() + 86400
-		);
+		$verificationExpiresAt = date('Y-m-d H:i:s', time() + 86400);
 
 		$stmt = $pdo->prepare(
 			'UPDATE users
 			SET email = :email,
-			email_verified = FALSE,
-			verification_token = :verification_token,
-			verification_expires_at = :verification_expires_at
+				email_verified = FALSE,
+				verification_token = :verification_token,
+				verification_expires_at = :verification_expires_at
 			WHERE id = :id'
 		);
 
@@ -198,23 +219,38 @@ class ProfileController
 			'id' => $_SESSION['user_id']
 		]);
 
-		echo '<h1>Email updated.</h1>';
-
-		echo '<p>Please verify your new email address.</p>';
-
 		$verificationUrl =
-				getenv('APP_URL')
-				. '/verify?token='
-				. urlencode($verificationToken);
+			getenv('APP_URL')
+			. '/verify?token='
+			. urlencode($verificationToken);
 
-		echo '<p><a href="'
-			. htmlspecialchars(
-			$verificationUrl,
-			ENT_QUOTES,
-			'UTF-8'
-			)
-			. '">Verify your new email</a></p>';
+		$mailer = new Mailer();
 
+		if (!$mailer->sendEmailChangeVerificationEmail($email, $currentUser['username'], $verificationUrl))
+		{
+			$stmt = $pdo->prepare(
+				'UPDATE users
+				SET email = :email,
+					email_verified = :email_verified,
+					verification_token = NULL,
+					verification_expires_at = NULL
+				WHERE id = :id'
+			);
+
+			$stmt->execute([
+				'email' => $currentUser['email'],
+				'email_verified' => $currentUser['email_verified'],
+				'id' => $_SESSION['user_id']
+			]);
+
+			http_response_code(500);
+			echo 'Unable to send email verification message.';
+			exit;
+		}
+
+		echo '<h1>Email change requested.</h1>';
+		echo '<p>Please check your new email address and verify it.</p>';
+		echo '<p>The verification link will expire in 24 hours.</p>';
 		echo '<p><a href="/profile">Back to profile</a></p>';
 
 		exit;
