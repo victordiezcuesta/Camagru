@@ -1,53 +1,150 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-    <title>Camagru - New photo</title>
+<title>Camagru - New photo</title>
 
-    <link
-        rel="stylesheet"
-        href="/assets/css/style.css"
-    >
+<link
+    rel="stylesheet"
+    href="/assets/css/style.css"
+>
 
 </head>
 
 <body>
 
-    <header class="site-header">
+<header class="site-header">
 
-        <div class="container">
+    <div class="container">
 
-            <a href="/" class="logo">
-                Camagru
-            </a>
+        <a href="/" class="logo">
+            Camagru
+        </a>
 
-        </div>
+    </div>
 
-    </header>
+</header>
 
-    <main class="main-content">
+<main class="main-content">
 
-        <section class="auth-card">
+    <section class="photo-editor">
+
+        <div class="photo-editor-main">
 
             <h1>New photo</h1>
 
             <p class="auth-subtitle">
-                Upload an image to Camagru.
+                Take a photo with your webcam or upload an image.
             </p>
 
+            <div class="camera-container">
+
+                <video
+                    id="camera"
+                    autoplay
+                    playsinline
+                ></video>
+
+                <div
+                    id="camera-message"
+                    class="camera-message"
+                >
+                    Camera is not active.
+                </div>
+
+            </div>
+
+            <div class="overlay-section">
+
+                <h2>Choose an overlay</h2>
+
+                <div class="overlay-list">
+
+                    <button
+                        type="button"
+                        class="overlay-option"
+                        data-overlay=""
+                    >
+                        None
+                    </button>
+
+                    <button
+                        type="button"
+                        class="overlay-option"
+                        data-overlay="overlay1"
+                    >
+                        Overlay 1
+                    </button>
+
+                    <button
+                        type="button"
+                        class="overlay-option"
+                        data-overlay="overlay2"
+                    >
+                        Overlay 2
+                    </button>
+
+                    <button
+                        type="button"
+                        class="overlay-option"
+                        data-overlay="overlay3"
+                    >
+                        Overlay 3
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="photo-editor-actions">
+
+                <button
+                    type="button"
+                    id="start-camera"
+                    class="btn-primary"
+                >
+                    Start camera
+                </button>
+
+                <button
+                    type="button"
+                    id="take-picture"
+                    class="btn-primary"
+                    disabled
+                >
+                    Take picture
+                </button>
+
+                <button
+                    type="button"
+                    id="upload-image"
+                    class="btn-primary"
+                >
+                    Upload image
+                </button>
+
+            </div>
+
+            <canvas
+                id="photo-canvas"
+                hidden
+            ></canvas>
+
             <form
+                id="photo-form"
                 action="/photo"
                 method="POST"
                 enctype="multipart/form-data"
-                class="auth-form"
+                class="photo-form"
             >
 
                 <input
@@ -60,66 +157,64 @@
                     ) ?>"
                 >
 
-                <div class="form-group">
-
-                    <label for="image">
-                        Image
-                    </label>
-
-                    <input
-                        type="file"
-                        id="image"
-                        name="image"
-                        accept="image/jpeg,image/png"
-                        required
-                    >
-
-                    <p class="profile-status">
-                        JPEG or PNG. Maximum size: 5 MB.
-                    </p>
-
-                </div>
-
-                <button
-                    type="submit"
-                    class="btn-primary"
+                <input
+                    type="hidden"
+                    id="selected-overlay"
+                    name="overlay"
+                    value=""
                 >
-                    Upload image
-                </button>
+
+                <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/jpeg,image/png"
+                    hidden
+                >
 
             </form>
 
-            <div class="auth-links">
-
-                <p>
-                    <a href="/gallery">
-                        Back to gallery
-                    </a>
-                </p>
-
-                <p>
-                    <a href="/">
-                        Back to home
-                    </a>
-                </p>
-
-            </div>
-
-        </section>
-
-    </main>
-
-    <footer class="site-footer">
-
-        <div class="container">
-
-            <p>
-                &copy; 2026 Camagru
-            </p>
+            <p
+                id="camera-error"
+                class="form-error"
+                hidden
+            ></p>
 
         </div>
 
-    </footer>
+        <aside class="photo-editor-sidebar">
+
+            <h2>My previous photos</h2>
+
+            <p class="profile-status">
+                Your previous photos will appear here.
+            </p>
+
+            <div
+                id="previous-photos"
+                class="previous-photos"
+            >
+            </div>
+
+        </aside>
+
+    </section>
+
+</main>
+
+<footer class="site-footer">
+
+    <div class="container">
+
+        <p>
+            &copy; 2026 Camagru
+        </p>
+
+    </div>
+
+</footer>
+
+<script src="/assets/js/photo-editor.js"></script>
 
 </body>
 
