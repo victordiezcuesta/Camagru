@@ -33,23 +33,17 @@ class AuthController
 		$errors = [];
 
 		if ($username === '')
-		{
 			$errors[] = 'Username is required.';
-		}
 
 		if ($password === '')
-		{
 			$errors[] = 'Password is required.';
-		}
 
 		if (!empty($errors))
 		{
 			http_response_code(400);
 
 			foreach ($errors as $error)
-			{
 				echo '<p>' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</p>';
-			}
 
 			exit;
 		}
@@ -126,36 +120,24 @@ class AuthController
 		$errors = [];
 
 		if ($username === '')
-		{
 			$errors[] = 'Username is required.';
-		}
 
 		if ($email === '')
-		{
 			$errors[] = 'Email is required.';
-		}
 		elseif (!filter_var($email, FILTER_VALIDATE_EMAIL))
-		{
 			$errors[] = 'Invalid email address.';
-		}
 
 		if ($password === '')
-		{
 			$errors[] = 'Password is required.';
-		}
 		elseif (strlen($password) < 8)
-		{
 			$errors[] = 'Password must contain at least 8 characters.';
-		}
 
 		if (!empty($errors))
 		{
 			http_response_code(400);
 
 			foreach ($errors as $error)
-			{
 				echo '<p>' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</p>';
-			}
 
 			exit;
 		}
@@ -163,9 +145,7 @@ class AuthController
 		$database = new Database();
 		$pdo = $database->getConnection();
 
-		$stmt = $pdo->prepare(
-			'SELECT id FROM users WHERE username = :username OR email = :email'
-		);
+		$stmt = $pdo->prepare('SELECT id FROM users WHERE username = :username OR email = :email');
 
 		$stmt->execute([
 			'username' => $username,
@@ -183,10 +163,7 @@ class AuthController
 
 		$verificationToken = bin2hex(random_bytes(32)); //genereamos un token a voleo
 
-		$verificationExpiresAt = date(
-			'Y-m-d H:i:s',
-			time() + 86400
-		);
+		$verificationExpiresAt = date('Y-m-d H:i:s', time() + 86400); //expira en 24 horas
 
 		$stmt = $pdo->prepare(
 			'INSERT INTO users (
@@ -271,10 +248,7 @@ class AuthController
 			exit;
 		}
 
-		if (
-			$user['verification_expires_at'] === null
-			|| strtotime($user['verification_expires_at']) < time()
-		)
+		if ($user['verification_expires_at'] === null || strtotime($user['verification_expires_at']) < time())
 		{
 			http_response_code(400);
 			echo 'Verification link has expired.';
@@ -346,10 +320,7 @@ class AuthController
 
 		$user = $stmt->fetch();
 
-		/*
-		* We deliberately return the same message whether
-		* the email exists or not.
-		*/
+		//enviamos el mismo mensaje tanto si existe el correo o no por seguiridad y no dar señales de si existe o no el correo
 		$message = 'If an account exists with that email address, a password reset link has been sent.';
 
 		if ($user === false)
@@ -369,11 +340,7 @@ class AuthController
 		}
 
 		$resetToken = bin2hex(random_bytes(32));
-
-		$resetExpiresAt = date(
-			'Y-m-d H:i:s',
-			time() + 3600
-		);
+		$resetExpiresAt = date('Y-m-d H:i:s', time() + 3600); //token valido una hora
 
 		$stmt = $pdo->prepare(
 			'UPDATE users
@@ -388,14 +355,49 @@ class AuthController
 			'id' => $user['id']
 		]);
 
-		/*
-		* Temporary development URL.
-		* Later this URL will be sent by email.
-		*/
 		$resetUrl =
 			getenv('APP_URL')
 			. '/reset-password?token='
 			. urlencode($resetToken);
+
+		$stmt = $pdo->prepare(
+			'SELECT username
+			FROM users
+			WHERE id = :id'
+		);
+
+		$stmt->execute([
+			'id' => $user['id']
+		]);
+
+		$userData = $stmt->fetch();
+
+		if ($userData === false)
+		{
+			http_response_code(500);
+			echo 'Unable to process password reset.';
+			exit;
+		}
+
+		$mailer = new Mailer();
+
+		$mailSent = $mailer->sendPasswordResetEmail($email, $userData['username'], $resetUrl);
+
+		if (!$mailSent)
+		{
+			$pdo->prepare(
+				'UPDATE users
+				SET password_reset_token = NULL,
+					password_reset_expires_at = NULL
+				WHERE id = :id'
+			)->execute([
+				'id' => $user['id']
+			]);
+
+			http_response_code(500);
+			echo 'Unable to send password reset email.';
+			exit;
+		}
 
 		echo '<h1>Password reset</h1>';
 
@@ -403,13 +405,7 @@ class AuthController
 			. htmlspecialchars($message, ENT_QUOTES, 'UTF-8')
 			. '</p>';
 
-		echo '<p>'
-			. '<a href="'
-			. htmlspecialchars($resetUrl, ENT_QUOTES, 'UTF-8')
-			. '">'
-			. 'Reset your password'
-			. '</a>'
-			. '</p>';
+		echo '<p><a href="/login">Back to login</a></p>';
 
 		exit;
 	}
@@ -524,20 +520,14 @@ class AuthController
 			exit;
 		}
 
-		if (
-			$user['password_reset_expires_at'] === null
-			|| strtotime($user['password_reset_expires_at']) < time()
-		)
+		if ($user['password_reset_expires_at'] === null || strtotime($user['password_reset_expires_at']) < time())
 		{
 			http_response_code(400);
 			echo 'Password reset link has expired.';
 			exit;
 		}
 
-		$passwordHash = password_hash(
-			$password,
-			PASSWORD_DEFAULT
-		);
+		$passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
 		$stmt = $pdo->prepare(
 			'UPDATE users
@@ -572,16 +562,7 @@ class AuthController
 		if (ini_get('session.use_cookies'))
 		{
 			$params = session_get_cookie_params();
-
-			setcookie(
-				session_name(),
-				'',
-				time() - 42000,
-				$params['path'],
-				$params['domain'],
-				$params['secure'],
-				$params['httponly']
-			);
+			setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
 		}
 
 		session_destroy();
