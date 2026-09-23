@@ -3685,11 +3685,12 @@ PHOTO CREATE
 
     gap: 24px;
 
-    align-items: start;
+    align-items: stretch;
 }
 
 /* ---------------- CAMERA PANEL ---------------- */
 .photo-camera-panel {
+    height: 100%;
     padding: 18px;
 
     background: #ffffff;
@@ -3976,6 +3977,12 @@ PHOTO CREATE
         repeat(3, minmax(0, 1fr));
 
     gap: 10px;
+
+    max-height: 275px;
+
+    overflow-y: auto;
+
+    padding-right: 6px;
 }
 
 .photo-overlay-option {
@@ -4178,6 +4185,12 @@ PHOTO CREATE
         repeat(3, minmax(0, 1fr));
 
     gap: 10px;
+
+    max-height: 300px;
+
+    overflow-y: auto;
+
+    padding-right: 6px;
 }
 
 .photo-previous-item {
@@ -4338,6 +4351,7 @@ PHOTO CREATE
 
     .photo-overlay-list {
         gap: 8px;
+        max-height: 360px;
     }
 
     .photo-overlay-option {

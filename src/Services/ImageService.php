@@ -16,10 +16,45 @@ class ImageService
 	];
 
 	private const ALLOWED_OVERLAYS = [
-		'overlay1' => 'overlay1.png',
-		'overlay2' => 'overlay2.png',
-		'overlay3' => 'overlay3.png'
+		'01' => '01_laptop_programacion.png',
+		'02' => '02_42_madrid.png',
+		'03' => '03_devs_no_duermen.png',
+		'04' => '04_gaming.png',
+		'05' => '05_viajes_montana.png',
+		'06' => '06_cafe_programador.png',
+		'07' => '07_minecraft_pixel.png',
+		'08' => '08_linux_forever.png',
+		'09' => '09_ramen.png',
+		'10' => '10_tu_puedes.png',
+		'11' => '11_tiburon_good_vibes.png',
+		'12' => '12_astroespacio.png',
+		'13' => '13_terminal_keep_going.png',
+		'14' => '14_good_boy_42.png',
+		'15' => '15_disciplina_montana.png',
+		'16' => '16_coder_sonoliento.png',
+		'17' => '17_banana_lets_go.png',
+		'18' => '18_42_cursor.png',
+		'19' => '19_pizza.png',
+		'20' => '20_cactus.png',
+		'21' => '21_dog.png',
+		'22' => '22_gafas_bigote.png',
+		'23' => '23_ojos.png',
+		'101' => '101_playa_tropical.png',
+		'102' => '102_romantico_kawaii.png',
+		'103' => '103_cine_film.png',
+		'104' => '104_aventura_montana.png',
+		'105' => '105_halloween.png'
 	];
+
+		private const RANDOM_POSITION_OVERLAYS = [
+		'01', '02', '03', '04', '05',
+		'06', '07', '08', '09', '10',
+		'11', '12', '13', '14', '15',
+		'16', '17', '18', '19', '20'
+	];
+
+	private const OVERLAY_SIZE = 500;
+	private const OVERLAY_MARGIN = 300;
 
 	public function saveUploadedImage(array $file, string $overlay): string
 	{
@@ -75,11 +110,43 @@ class ImageService
 			$width = imagesx($sourceImage); //calcula los tamaños de las fotos
 			$height = imagesy($sourceImage);
 
-			$overlayWidth = imagesx($overlayImage);
-			$overlayHeight = imagesy($overlayImage);
-
 			imagealphablending($sourceImage, true); //le decimos a GD que cuando coloquemos el overlay sobre la fotografía, debe respetar la transparencia
-			imagecopyresampled($sourceImage, $overlayImage, 0, 0, 0, 0, $width, $height, $overlayWidth, $overlayHeight); //Redimensionamos el overlay y lo colocamos directamente sobre la fotografia
+
+			if (in_array($overlay, self::RANDOM_POSITION_OVERLAYS, true))
+			{
+				$overlayWidth = self::OVERLAY_SIZE;
+				$overlayHeight = self::OVERLAY_SIZE;
+				$margin = self::OVERLAY_MARGIN;
+
+				$positions = [
+					[
+						'x' => $margin,
+						'y' => $margin
+					],
+					[
+						'x' => $margin,
+						'y' => max(0, $height - $overlayHeight - $margin)
+					],
+					[
+						'x' => max(0, $width - $overlayWidth - $margin),
+						'y' => $margin
+					],
+					[
+						'x' => max(0, $width - $overlayWidth - $margin),
+						'y' => max(0, $height - $overlayHeight - $margin)
+					]
+				];
+
+				$position = $positions[random_int(0, 3)];
+				imagecopy($sourceImage, $overlayImage, $position['x'], $position['y'], 0, 0, $overlayWidth, $overlayHeight);
+			}
+			else
+			{
+				$overlayWidth = imagesx($overlayImage);
+				$overlayHeight = imagesy($overlayImage);
+				imagecopyresampled($sourceImage, $overlayImage, 0, 0, 0, 0, $width, $height, $overlayWidth, $overlayHeight); //Redimensionamos el overlay y lo colocamos directamente sobre la fotografia
+			}
+
 			imagedestroy($overlayImage); //liberamos la memoria del overlay
 		}
 

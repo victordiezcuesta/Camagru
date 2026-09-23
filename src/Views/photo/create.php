@@ -177,6 +177,31 @@
 
                     </div>
 
+                    <!-- UPLOAD -->
+                    <section class="photo-upload-section">
+
+                        <div class="photo-upload-divider">
+
+                            <span>
+                                OR
+                            </span>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            id="upload-image"
+                            class="photo-upload-button"
+                        >
+                            Upload an image
+                        </button>
+
+                        <p>
+                            JPEG or PNG · Maximum 5 MB
+                        </p>
+
+                    </section>
+
                 </section>
 
                 <!-- CONTROLS -->
@@ -209,21 +234,21 @@
                             <button
                                 type="button"
                                 class="photo-overlay-option overlay-option"
-                                data-overlay="overlay1"
-                                aria-label="Select overlay 1"
+                                data-overlay="01"
+                                aria-label="Select overlay 01"
                             >
 
                                 <span class="photo-overlay-image">
 
                                     <img
-                                        src="/assets/overlays/overlay1.png"
-                                        alt="Overlay 1"
+                                        src="/assets/overlays/01_laptop_programacion.png"
+                                        alt="Laptop programming"
                                     >
 
                                 </span>
 
                                 <span class="photo-overlay-name">
-                                    Overlay 1
+                                    Laptop programming
                                 </span>
 
                             </button>
@@ -231,21 +256,21 @@
                             <button
                                 type="button"
                                 class="photo-overlay-option overlay-option"
-                                data-overlay="overlay2"
-                                aria-label="Select overlay 2"
+                                data-overlay="02"
+                                aria-label="Select overlay 02"
                             >
 
                                 <span class="photo-overlay-image">
 
                                     <img
-                                        src="/assets/overlays/overlay2.png"
-                                        alt="Overlay 2"
+                                        src="/assets/overlays/02_42_madrid.png"
+                                        alt="42 Madrid"
                                     >
 
                                 </span>
 
                                 <span class="photo-overlay-name">
-                                    Overlay 2
+                                    42 Madrid
                                 </span>
 
                             </button>
@@ -253,52 +278,576 @@
                             <button
                                 type="button"
                                 class="photo-overlay-option overlay-option"
-                                data-overlay="overlay3"
-                                aria-label="Select overlay 3"
+                                data-overlay="03"
+                                aria-label="Select overlay 03"
                             >
 
                                 <span class="photo-overlay-image">
 
                                     <img
-                                        src="/assets/overlays/overlay3.png"
-                                        alt="Overlay 3"
+                                        src="/assets/overlays/03_devs_no_duermen.png"
+                                        alt="Devs no duermen"
                                     >
 
                                 </span>
 
                                 <span class="photo-overlay-name">
-                                    Overlay 3
+                                    Devs no duermen
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="04"
+                                aria-label="Select overlay 04"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/04_gaming.png"
+                                        alt="Gaming"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Gaming
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="05"
+                                aria-label="Select overlay 05"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/05_viajes_montana.png"
+                                        alt="Mountain travel"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Mountain travel
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="06"
+                                aria-label="Select overlay 06"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/06_cafe_programador.png"
+                                        alt="Programmer coffee"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Programmer coffee
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="07"
+                                aria-label="Select overlay 07"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/07_minecraft_pixel.png"
+                                        alt="Minecraft pixel"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Minecraft pixel
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="08"
+                                aria-label="Select overlay 08"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/08_linux_forever.png"
+                                        alt="Linux forever"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Linux forever
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="09"
+                                aria-label="Select overlay 09"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/09_ramen.png"
+                                        alt="Ramen"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Ramen
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="10"
+                                aria-label="Select overlay 10"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/10_tu_puedes.png"
+                                        alt="Tu puedes"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Tu puedes
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="11"
+                                aria-label="Select overlay 11"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/11_tiburon_good_vibes.png"
+                                        alt="Good vibes"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Good vibes
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="12"
+                                aria-label="Select overlay 12"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/12_astroespacio.png"
+                                        alt="Astro space"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Astro space
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="13"
+                                aria-label="Select overlay 13"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/13_terminal_keep_going.png"
+                                        alt="Terminal keep going"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Terminal keep going
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="14"
+                                aria-label="Select overlay 14"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/14_good_boy_42.png"
+                                        alt="Good boy 42"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Good boy 42
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="15"
+                                aria-label="Select overlay 15"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/15_disciplina_montana.png"
+                                        alt="Mountain discipline"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Mountain discipline
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="16"
+                                aria-label="Select overlay 16"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/16_coder_sonoliento.png"
+                                        alt="Sleepy coder"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Sleepy coder
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="17"
+                                aria-label="Select overlay 17"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/17_banana_lets_go.png"
+                                        alt="Banana let's go"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Banana let's go
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="18"
+                                aria-label="Select overlay 18"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/18_42_cursor.png"
+                                        alt="42 cursor"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    42 cursor
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="19"
+                                aria-label="Select overlay 19"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/19_pizza.png"
+                                        alt="Pizza"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Pizza
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="20"
+                                aria-label="Select overlay 20"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/20_cactus.png"
+                                        alt="Cactus"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Cactus
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="21"
+                                aria-label="Select overlay 21"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/21_dog.png"
+                                        alt="Dog"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Dog
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="22"
+                                aria-label="Select overlay 22"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/22_gafas_bigote.png"
+                                        alt="Glasses and moustache"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Glasses and moustache
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="23"
+                                aria-label="Select overlay 23"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/23_ojos.png"
+                                        alt="Eyes"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Eyes
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="101"
+                                aria-label="Select overlay 101"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/101_playa_tropical.png"
+                                        alt="Tropical beach"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Tropical beach
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="102"
+                                aria-label="Select overlay 102"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/102_romantico_kawaii.png"
+                                        alt="Romantic kawaii"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Romantic kawaii
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="103"
+                                aria-label="Select overlay 103"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/103_cine_film.png"
+                                        alt="Cinema film"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Cinema film
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="104"
+                                aria-label="Select overlay 104"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/104_aventura_montana.png"
+                                        alt="Mountain adventure"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Mountain adventure
+                                </span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="photo-overlay-option overlay-option"
+                                data-overlay="105"
+                                aria-label="Select overlay 105"
+                            >
+
+                                <span class="photo-overlay-image">
+
+                                    <img
+                                        src="/assets/overlays/105_halloween.png"
+                                        alt="Halloween"
+                                    >
+
+                                </span>
+
+                                <span class="photo-overlay-name">
+                                    Halloween
                                 </span>
 
                             </button>
 
                         </div>
-
-                    </section>
-
-                    <!-- UPLOAD -->
-
-                    <section class="photo-upload-section">
-
-                        <div class="photo-upload-divider">
-
-                            <span>
-                                OR
-                            </span>
-
-                        </div>
-
-                        <button
-                            type="button"
-                            id="upload-image"
-                            class="photo-upload-button"
-                        >
-                            Upload an image
-                        </button>
-
-                        <p>
-                            JPEG or PNG · Maximum 5 MB
-                        </p>
 
                     </section>
 
