@@ -212,6 +212,37 @@
                                 alt="Previous photo"
                             >
 
+                            <form
+                                action="/photo/delete"
+                                method="POST"
+                                class="delete-photo-form"
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="<?= htmlspecialchars(
+                                        $csrfToken,
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="image_id"
+                                    value="<?= (int)$image['id'] ?>"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="delete-photo-button"
+                                >
+                                    Delete
+                                </button>
+
+                            </form>
+
                         </div>
 
                     <?php endforeach; ?>

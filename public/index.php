@@ -133,6 +133,12 @@ if ($path === '/photo' && $method === 'POST')
 	exit;
 }
 
+if ($path === '/photo/delete' && $method === 'POST')
+{
+	$photoController->delete();
+	exit;
+}
+
 if ($path === '/gallery/like' && $method === 'POST')
 {
 	$galleryInteractionController->toggleLike();

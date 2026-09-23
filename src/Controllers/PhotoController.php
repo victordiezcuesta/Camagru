@@ -126,4 +126,86 @@ class PhotoController
 		header('Location: /gallery');
 		exit;
 	}
+
+	public function delete(): void
+	{
+		$this->requireAuthentication();
+
+		if (!Csrf::validate($_POST['csrf_token'] ?? null))
+		{
+			http_response_code(403);
+			echo 'Invalid CSRF token.';
+			exit;
+		}
+
+		$imageId = filter_var(
+			$_POST['image_id'] ?? null,
+			FILTER_VALIDATE_INT
+		);
+
+		if ($imageId === false || $imageId <= 0)
+		{
+			http_response_code(400);
+			echo 'Invalid image.';
+			exit;
+		}
+
+		$database = new Database();
+		$pdo = $database->getConnection();
+
+		$stmt = $pdo->prepare(
+			'SELECT
+				id,
+				filename
+			FROM images
+			WHERE id = :image_id
+			AND user_id = :user_id'
+		);
+
+		$stmt->execute([
+			'image_id' => $imageId,
+			'user_id' => $_SESSION['user_id']
+		]);
+
+		$image = $stmt->fetch();
+
+		if ($image === false)
+		{
+			http_response_code(404);
+			echo 'Image not found.';
+			exit;
+		}
+
+		$filename = $image['filename'];
+
+		if (basename($filename) !== $filename) //evita aceptar un nombre que intente salir de public/uploads/, por ejemplo mediante una ruta manipulada
+		{
+			http_response_code(500);
+			echo 'Invalid image filename.';
+			exit;
+		}
+
+		$filepath = __DIR__ . '/../../public/uploads/' . $filename;
+
+		if (is_file($filepath) && !unlink($filepath))
+		{
+			http_response_code(500);
+			echo 'Unable to delete image.';
+			exit;
+		}
+
+		$stmt = $pdo->prepare(
+			'DELETE FROM images
+			WHERE id = :image_id
+			AND user_id = :user_id'
+		);
+
+		$stmt->execute([
+			'image_id' => $imageId,
+			'user_id' => $_SESSION['user_id']
+		]);
+
+		header('Location: /photo/create');
+		exit;
+	}
 }
