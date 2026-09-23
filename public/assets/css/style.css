@@ -1758,3 +1758,260 @@ REGISTER
         padding: 24px 20px;
     }
 }
+
+/* =========================================================
+FORGOT PASSWORD
+========================================================= */
+.forgot-password-main {
+    flex: 1;
+
+    background:
+        linear-gradient(
+            180deg,
+            #fafafa 0%,
+            #f5f5f5 100%
+        );
+}
+
+.forgot-password-section {
+    min-height: calc(100vh - 70px - 73px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 70px 20px;
+}
+
+.forgot-password-container {
+    width: min(100%, 460px);
+}
+
+/* Intro */
+.forgot-password-intro {
+    margin-bottom: 30px;
+
+    text-align: center;
+}
+
+.forgot-password-eyebrow {
+    margin-bottom: 14px;
+
+    color: #6b7280;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: 0.16em;
+}
+
+.forgot-password-intro h1 {
+    margin-bottom: 16px;
+
+    color: #111827;
+
+    font-size: clamp(34px, 6vw, 48px);
+    font-weight: 800;
+
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+}
+
+.forgot-password-description {
+    max-width: 430px;
+
+    margin: 0 auto;
+
+    color: #6b7280;
+
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+/* Card */
+.forgot-password-card {
+    padding: 30px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+/* Form */
+.forgot-password-form {
+    display: flex;
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+.forgot-password-field {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.forgot-password-field label {
+    color: #374151;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.forgot-password-field input {
+    width: 100%;
+
+    min-height: 46px;
+
+    padding: 0 13px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+
+    background: #ffffff;
+    color: #111827;
+
+    font-family: inherit;
+    font-size: 15px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.forgot-password-field input:hover {
+    border-color: #9ca3af;
+}
+
+.forgot-password-field input:focus {
+    border-color: #111827;
+
+    box-shadow:
+        0 0 0 3px rgba(17, 24, 39, 0.08);
+}
+
+.forgot-password-field input::placeholder {
+    color: #9ca3af;
+}
+
+/* Button */
+.forgot-password-button {
+    width: 100%;
+
+    min-height: 46px;
+
+    margin-top: 2px;
+
+    padding: 0 20px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: #111827;
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.forgot-password-button:hover {
+    background: #000000;
+
+    transform: translateY(-1px);
+}
+
+.forgot-password-button:focus-visible {
+    outline: 3px solid rgba(17, 24, 39, 0.18);
+    outline-offset: 2px;
+}
+
+/* Separator */
+.forgot-password-divider {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    margin: 25px 0 20px;
+
+    color: #9ca3af;
+
+    font-size: 12px;
+}
+
+.forgot-password-divider::before,
+.forgot-password-divider::after {
+    content: "";
+
+    flex: 1;
+
+    height: 1px;
+
+    background: #e5e7eb;
+}
+
+.forgot-password-divider span {
+    flex: 0 0 auto;
+}
+
+/* Login link */
+.forgot-password-login {
+    color: #6b7280;
+
+    font-size: 14px;
+    line-height: 1.6;
+
+    text-align: center;
+}
+
+.forgot-password-login a {
+    color: #111827;
+
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+.forgot-password-login a:hover {
+    text-decoration: underline;
+}
+
+/* Forgot password responsive */
+@media (max-width: 520px) {
+
+    .forgot-password-section {
+        min-height: auto;
+
+        padding: 55px 12px 60px;
+    }
+
+    .forgot-password-intro {
+        margin-bottom: 25px;
+    }
+
+    .forgot-password-intro h1 {
+        font-size: 36px;
+    }
+
+    .forgot-password-description {
+        font-size: 14px;
+    }
+
+    .forgot-password-card {
+        padding: 24px 20px;
+    }
+}

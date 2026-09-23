@@ -12,70 +12,146 @@
 
 <body>
 
-    <header class="site-header">
-        <div class="container">
-            <a href="/" class="logo">Camagru</a>
-        </div>
-    </header>
+<header class="site-header">
 
-    <main class="main-content">
+    <div class="container site-header-inner">
 
-        <section class="auth-card">
+        <a href="/" class="logo">
+            Camagru
+        </a>
 
-            <h1>Forgot password?</h1>
+        <nav class="main-nav" aria-label="Main navigation">
 
-            <p class="auth-subtitle">
-                Enter your email address and we will send you a password reset link.
-            </p>
+            <a href="/" class="nav-link">
+                Home
+            </a>
 
-            <form action="/forgot-password" method="POST" class="auth-form">
+            <a href="/gallery" class="nav-link">
+                Gallery
+            </a>
 
-                <input
-                    type="hidden"
-                    name="csrf_token"
-                    value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>"
-                >
+            <a href="/login" class="nav-link active" aria-current="page">
+                Login
+            </a>
 
-                <div class="form-group">
+            <a href="/register" class="nav-register">
+                Sign up
+            </a>
 
-                    <label for="email">
-                        Email
-                    </label>
+        </nav>
 
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        autocomplete="email"
-                        required
-                    >
+    </div>
 
-                </div>
+</header>
 
-                <button type="submit" class="btn-primary">
-                    Send reset link
-                </button>
+<main class="forgot-password-main">
 
-            </form>
+    <section class="forgot-password-section">
 
-            <div class="auth-links">
+        <div class="forgot-password-container">
 
-                <p>
-                    Remember your password?
-                    <a href="/login">Back to login</a>
+            <div class="forgot-password-intro">
+
+                <p class="forgot-password-eyebrow">
+                    ACCOUNT RECOVERY
+                </p>
+
+                <h1>
+                    Forgot your password?
+                </h1>
+
+                <p class="forgot-password-description">
+                    Enter the email address associated with your account
+                    and we will send you a password reset link.
                 </p>
 
             </div>
 
-        </section>
+            <div class="forgot-password-card">
 
-    </main>
+                <form
+                    action="/forgot-password"
+                    method="POST"
+                    class="forgot-password-form"
+                >
 
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 Camagru</p>
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>"
+                    >
+
+                    <div class="forgot-password-field">
+
+                        <label for="email">
+                            Email address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            autocomplete="email"
+                            placeholder="you@example.com"
+                            required
+                        >
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="forgot-password-button"
+                    >
+                        Send reset link
+                    </button>
+
+                </form>
+
+                <div class="forgot-password-divider">
+                    <span>or</span>
+                </div>
+
+                <p class="forgot-password-login">
+
+                    Remember your password?
+
+                    <a href="/login">
+                        Back to login
+                    </a>
+
+                </p>
+
+            </div>
+
         </div>
-    </footer>
+
+    </section>
+
+</main>
+
+<footer class="site-footer">
+
+    <div class="container footer-inner">
+
+        <div>
+
+            <strong>
+                Camagru
+            </strong>
+
+            <span>
+                Create. Capture. Share.
+            </span>
+
+        </div>
+
+        <p>
+            &copy; 2026 Camagru
+        </p>
+
+    </div>
+
+</footer>
 
 </body>
 
