@@ -52,7 +52,7 @@
                     href="/photo/create"
                     class="nav-link"
                 >
-                    Create
+                    New photo
                 </a>
 
                 <a

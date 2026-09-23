@@ -3,6 +3,7 @@
 const camera = document.getElementById('camera');
 const startCameraButton = document.getElementById('start-camera');
 const takePictureButton = document.getElementById('take-picture');
+const stopCameraButton = document.getElementById('stop-camera');
 const uploadImageButton = document.getElementById('upload-image');
 const cameraMessage = document.getElementById('camera-message');
 const cameraError = document.getElementById('camera-error');
@@ -28,14 +29,23 @@ function clearError()
 	cameraError.hidden = true;
 }
 
-function updateTakePictureButton()
+function updateCameraButtons()
 {
-	takePictureButton.disabled = cameraStream === null || selectedOverlay === null; //El botón "Take Picture" solamente puede utilizarse cuando tengo cámara + overlay.
+	const cameraActive = cameraStream !== null;
+
+	startCameraButton.disabled = cameraActive;
+
+	stopCameraButton.disabled = !cameraActive;
+
+	takePictureButton.disabled = !cameraActive || selectedOverlay === null; //El botón "Take Picture" solamente puede utilizarse cuando tengo cámara + overlay.
 }
 
 async function startCamera() //función asíncrona: El navegador tiene que: 1. pedir permiso; 2. acceder al hardware; 3. obtener el stream; 4. devolverlo.
 {
 	clearError();
+
+	if (cameraStream !== null)
+		return;
 
 	if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) //Comprobar si el navegador permite usar la cámara
 	{
@@ -49,35 +59,77 @@ async function startCamera() //función asíncrona: El navegador tiene que: 1. p
 			video: true,
 			audio: false
 		}); //Quiero acceder a la cámara, pero no al micrófono
-
 		camera.srcObject = cameraStream;
+		cameraMessage.classList.add('is-hidden');
 
-		cameraMessage.hidden = true; //Ocultar el mensaje Start the Camera
-		startCameraButton.disabled = true; // desabilitamos el boton
-
-		updateTakePictureButton();
+		updateCameraButtons();
 	}
 	catch (error)
 	{
+		cameraStream = null;
+		camera.srcObject = null;
+		cameraMessage.classList.remove('is-hidden');
 		showError('Unable to access the camera. Please allow camera access.');
+		updateCameraButtons();
 	}
+}
+
+function stopCamera()
+{
+	clearError();
+
+	if (cameraStream === null)
+		return;
+
+	cameraStream.getTracks().forEach(
+		function (track)
+		{
+			track.stop();
+		}
+	);
+	camera.srcObject = null;
+	cameraStream = null;
+	cameraMessage.classList.remove('is-hidden');
+
+	updateCameraButtons();
 }
 
 function selectOverlay(button) //función se ejecuta cuando seleccionas un overlay
 {
-	overlayOptions.forEach(function (option) //Primero deselecciona todos(overlayOptions, todos los overlays) | forEach(Ejecuta esta función para cada elemento)
+	const overlay = button.dataset.overlay;
+
+	//Si el overlay pulsado ya era el seleccionado, lo deseleccionamos.
+	if (selectedOverlay === overlay)
+	{
+		button.classList.remove('selected');
+		button.setAttribute('aria-pressed', 'false');
+
+		selectedOverlay = null;
+		selectedOverlayInput.value = '';
+
+		clearError();
+		updateCameraButtons();
+
+		return;
+	}
+
+	// Si hemos pulsado un overlay diferente, primero quitamos la selección anterior.
+	overlayOptions.forEach(function (option)
 	{
 		option.classList.remove('selected');
+		option.setAttribute('aria-pressed', 'false');
 	});
 
-	/* asigna el overlay que has pulsado*/
+	//Seleccionamos el nuevo overlay.
 	button.classList.add('selected');
-	selectedOverlay = button.dataset.overlay;
+	button.setAttribute('aria-pressed', 'true');
+
+	selectedOverlay = overlay;
 	selectedOverlayInput.value = selectedOverlay;
 
-	updateTakePictureButton();
+	clearError();
+	updateCameraButtons();
 }
-
 function takePicture()
 {
 	if (cameraStream === null)
@@ -143,7 +195,6 @@ function uploadImage() //subir una foto existente
 	if (selectedOverlay === null)
 	{
 		showError('Please choose an overlay first.');
-
 		return;
 	}
 
@@ -184,6 +235,11 @@ takePictureButton.addEventListener(
 	takePicture
 );
 
+stopCameraButton.addEventListener(
+	'click',
+	stopCamera
+);
+
 uploadImageButton.addEventListener(
 	'click',
 	uploadImage
@@ -200,6 +256,8 @@ overlayOptions.forEach(function (button)
 		}
 	);
 });
+
+updateCameraButtons();
 
 /*si abandona la pagina el usario verifica que la camara no este activada mediante cameraStream y
 si esta activada que la desactiva para no ocupar un recursos del sistema*/

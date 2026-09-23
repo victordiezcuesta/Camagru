@@ -31,7 +31,7 @@
 				<?php if ($isAuthenticated): ?>
 
 					<a href="/photo/create" class="nav-link">
-						Create
+						New photo
 					</a>
 
 					<a href="/profile" class="nav-link">
