@@ -11,4 +11,6 @@ RUN apt-get update \
         gd \
     && rm -rf /var/lib/apt/lists/*
 
+COPY docker/php/php.ini /usr/local/etc/php/conf.d/camagru.ini
+
 WORKDIR /var/www/html

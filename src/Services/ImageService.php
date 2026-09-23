@@ -43,6 +43,11 @@ class ImageService
 		if ($imageInfo === false)
 			throw new RuntimeException('Invalid image.');
 
+		$width = $imageInfo[0];
+		$height = $imageInfo[1];
+		if ($width <= 0 || $height <= 0)
+			throw new RuntimeException('Invalid image dimensions.');
+		// Si son demasiado grandes las imagenes las redimensionamos
 		if ($overlay !== '' && !isset(self::ALLOWED_OVERLAYS[$overlay]))
 			throw new RuntimeException('Invalid overlay.');
 
@@ -66,29 +71,16 @@ class ImageService
 				imagedestroy($sourceImage); //liberamos la memoria de la funcion imagecreatefrompng
 				throw new RuntimeException('Unable to load overlay.');
 			}
-		
+
 			$width = imagesx($sourceImage); //calcula los tamaños de las fotos
 			$height = imagesy($sourceImage);
 
 			$overlayWidth = imagesx($overlayImage);
 			$overlayHeight = imagesy($overlayImage);
 
-			$resizedOverlay = imagecreatetruecolor($width, $height); //creamos una imagen nueva de overlay vacia del tamaño de la foto principal
-
-			if ($resizedOverlay === false)
-			{
-				imagedestroy($sourceImage);
-				imagedestroy($overlayImage);
-				throw new RuntimeException('Unable to create image.');
-			}
-
-			imagealphablending($resizedOverlay, false); //Vamos a trabajar con el canal transparencia de forma explícita
-			imagesavealpha($resizedOverlay, true); //Conserva la información de transparencia
-			$transparent = imagecolorallocatealpha($resizedOverlay, 0, 0, 0, 127); //creamos un color transparente, 0 0 0 RGB, 127=transparencia máxima en GD
-			imagefill($resizedOverlay, 0, 0, $transparent); //rellena toda la imagen con ese color transparente
-			imagecopyresampled($resizedOverlay, $overlayImage, 0, 0, 0, 0, $width, $height, $overlayWidth, $overlayHeight); //Redimensionamos el overlay con el otro overlay copia
 			imagealphablending($sourceImage, true); //le decimos a GD que cuando coloquemos el overlay sobre la fotografía, debe respetar la transparencia
-			imagecopy($sourceImage, $resizedOverlay, 0, 0, 0, 0, $width, $height); //ponemos el overlay redimensionado encima de la fotografia principal
+			imagecopyresampled($sourceImage, $overlayImage, 0, 0, 0, 0, $width, $height, $overlayWidth, $overlayHeight); //Redimensionamos el overlay y lo colocamos directamente sobre la fotografia
+			imagedestroy($overlayImage); //liberamos la memoria del overlay
 		}
 
 		$filename = bin2hex(random_bytes(32)) . '.jpg'; //cambiamos el nombre a la foto por si suben dos fotos con el mismo nobre
@@ -98,22 +90,10 @@ class ImageService
 		if (!imagejpeg($sourceImage, $destination, 90)) //convierte la imagen final en memoria en un archivo JPEG | 90=calidad JPEG
 		{
 			imagedestroy($sourceImage);
-			if ($overlay !== '')
-			{
-				imagedestroy($overlayImage);
-				imagedestroy($resizedOverlay);
-			}
-
 			throw new RuntimeException('Unable to save image.');
 		}
 
 		imagedestroy($sourceImage);
-		if ($overlay !== '')
-		{
-			imagedestroy($overlayImage);
-			imagedestroy($resizedOverlay);
-		}
-
 		return $filename;
 	}
 
