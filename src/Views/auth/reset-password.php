@@ -13,83 +13,137 @@
 <body>
 
     <header class="site-header">
-        <div class="container">
-            <a href="/" class="logo">Camagru</a>
+
+        <div class="container site-header-inner">
+
+            <a href="/" class="logo">
+                Camagru
+            </a>
+
+            <nav class="main-nav" aria-label="Main navigation">
+
+                <a href="/" class="nav-link">
+                    Home
+                </a>
+
+                <a href="/gallery" class="nav-link">
+                    Gallery
+                </a>
+
+                <a href="/login" class="nav-link active" aria-current="page">
+                    Login
+                </a>
+
+                <a href="/register" class="nav-register">
+                    Sign up
+                </a>
+
+            </nav>
+
         </div>
+
     </header>
 
-    <main class="main-content">
+    <main class="reset-password-main">
 
-        <section class="auth-card">
+        <section class="reset-password-section">
 
-            <h1>Reset password</h1>
+            <div class="reset-password-container">
 
-            <p class="auth-subtitle">
-                Enter your new password.
-            </p>
+                <div class="reset-password-intro">
 
-            <p class="profile-status">
-                At least 8 characters, one uppercase letter,
-                one lowercase letter and one number.
-            </p>
+                    <p class="reset-password-eyebrow">
+                        ACCOUNT RECOVERY
+                    </p>
 
-            <form action="/reset-password" method="POST" class="auth-form">
+                    <h1>
+                        Reset your password
+                    </h1>
 
-                <input
-                    type="hidden"
-                    name="token"
-                    value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>"
-                >
-
-                <input
-                    type="hidden"
-                    name="csrf_token"
-                    value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>"
-                >
-
-                <div class="form-group">
-
-                    <label for="password">
-                        New password
-                    </label>
-
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        autocomplete="new-password"
-                        required
-                    >
+                    <p class="reset-password-description">
+                        Choose a new password for your Camagru account.
+                    </p>
 
                 </div>
 
-                <div class="form-group">
+                <div class="reset-password-card">
 
-                    <label for="password_confirmation">
-                        Confirm new password
-                    </label>
-
-                    <input
-                        type="password"
-                        id="password_confirmation"
-                        name="password_confirmation"
-                        autocomplete="new-password"
-                        required
+                    <form
+                        action="/reset-password"
+                        method="POST"
+                        class="reset-password-form"
                     >
 
+                        <input
+                            type="hidden"
+                            name="token"
+                            value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>"
+                        >
+
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>"
+                        >
+
+                        <div class="reset-password-field">
+
+                            <label for="password">
+                                New password
+                            </label>
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                autocomplete="new-password"
+                                required
+                            >
+
+                            <p class="reset-password-help">
+                                At least 8 characters, one uppercase letter,
+                                one lowercase letter and one number.
+                            </p>
+
+                        </div>
+
+                        <div class="reset-password-field">
+
+                            <label for="password_confirmation">
+                                Confirm new password
+                            </label>
+
+                            <input
+                                type="password"
+                                id="password_confirmation"
+                                name="password_confirmation"
+                                autocomplete="new-password"
+                                required
+                            >
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="reset-password-button"
+                        >
+                            Reset password
+                        </button>
+
+                    </form>
+
+                    <div class="reset-password-divider">
+                        <span>or</span>
+                    </div>
+
+                    <p class="reset-password-login">
+                        Remember your password?
+                        <a href="/login">
+                            Back to login
+                        </a>
+                    </p>
+
                 </div>
-
-                <button type="submit" class="btn-primary">
-                    Reset password
-                </button>
-
-            </form>
-
-            <div class="auth-links">
-
-                <p>
-                    <a href="/login">Back to login</a>
-                </p>
 
             </div>
 
@@ -98,11 +152,21 @@
     </main>
 
     <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 Camagru</p>
+
+        <div class="container footer-inner">
+
+            <div>
+                <strong>Camagru</strong>
+                <span>Create. Capture. Share.</span>
+            </div>
+
+            <p>
+                &copy; 2026 Camagru
+            </p>
+
         </div>
+
     </footer>
 
 </body>
-
 </html>
