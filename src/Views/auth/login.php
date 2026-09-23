@@ -19,7 +19,7 @@
             <nav class="main-nav" aria-label="Main navigation">
                 <a href="/" class="nav-link">Home</a>
                 <a href="/gallery" class="nav-link">Gallery</a>
-                <a href="/login" class="nav-link active" aria-current="page">Log in</a>
+                <a href="/login" class="nav-link active" aria-current="page">Login</a>
                 <a href="/register" class="nav-register">Sign up</a>
             </nav>
 
@@ -84,7 +84,7 @@
                         </div>
 
                         <button type="submit" class="login-button">
-                            Log in
+                            Login
                         </button>
 
                     </form>
