@@ -186,15 +186,39 @@
 
             <h2>My previous photos</h2>
 
-            <p class="profile-status">
-                Your previous photos will appear here.
-            </p>
+            <?php if (empty($previousImages)): ?>
 
-            <div
-                id="previous-photos"
-                class="previous-photos"
-            >
-            </div>
+                <p class="profile-status">
+                    You have not created any photos yet.
+                </p>
+
+            <?php else: ?>
+
+                <div
+                    id="previous-photos"
+                    class="previous-photos"
+                >
+
+                    <?php foreach ($previousImages as $image): ?>
+
+                        <div class="previous-photo">
+
+                            <img
+                                src="/uploads/<?= htmlspecialchars(
+                                    $image['filename'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>"
+                                alt="Previous photo"
+                            >
+
+                        </div>
+
+                    <?php endforeach; ?>
+
+                </div>
+
+            <?php endif; ?>
 
         </aside>
 

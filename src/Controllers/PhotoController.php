@@ -26,7 +26,26 @@ class PhotoController
 
 		$csrfToken = Csrf::token();
 
-		require __DIR__ . '/../Views/photo/create.php';
+		$database = new Database();
+		$pdo = $database->getConnection();
+
+		$stmt = $pdo->prepare(
+			'SELECT
+				id,
+				filename,
+				created_at
+			FROM images
+			WHERE user_id = :user_id
+			ORDER BY created_at DESC'
+		);
+
+		$stmt->execute([
+			'user_id' => $_SESSION['user_id']
+		]);
+
+		$previousImages = $stmt->fetchAll();
+
+		require __DIR__ . '/../Views/photo/create.php'; //incluye ese archivo todas las veces que lo pongas, si pones _once solo lo incluye una vez
 	}
 
 	public function store(): void

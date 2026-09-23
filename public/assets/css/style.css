@@ -565,21 +565,22 @@ body {
 }
 
 .previous-photos {
-    display: grid;
-
-    grid-template-columns: repeat(2, 1fr);
-
-    gap: 10px;
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 12px;
+	max-height: 600px;
+	overflow-y: auto;
 }
 
 .previous-photo {
-    width: 100%;
+	width: 100%;
+}
 
-    aspect-ratio: 1 / 1;
-
-    object-fit: cover;
-
-    border-radius: 6px;
+.previous-photo img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: 8px;
 }
 
 .form-error {
