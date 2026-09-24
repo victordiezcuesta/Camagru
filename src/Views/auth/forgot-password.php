@@ -57,69 +57,96 @@
                 </p>
 
                 <h1>
-                    Forgot your password?
+                    <?= isset($message) ? 'Password reset' : 'Forgot your password?' ?>
                 </h1>
 
                 <p class="forgot-password-description">
-                    Enter the email address associated with your account
-                    and we will send you a password reset link.
-                </p>
 
+                    <?php if (isset($message)): ?>
+
+                        Your password reset request has been processed.
+
+                    <?php else: ?>
+
+                        Enter the email address associated with your account
+                        and we will send you a password reset link.
+
+                    <?php endif; ?>
+
+                </p>
             </div>
 
             <div class="forgot-password-card">
 
-                <form
-                    action="/forgot-password"
-                    method="POST"
-                    class="forgot-password-form"
-                >
+                <?php if (isset($message)): ?>
 
-                    <input
-                        type="hidden"
-                        name="csrf_token"
-                        value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>"
+                    <p class="forgot-password-description">
+                        <?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?>
+                    </p>
+
+                    <p class="forgot-password-login">
+
+                        <a href="/login">
+                            Back to login
+                        </a>
+
+                    </p>
+
+                <?php else: ?>
+
+                    <form
+                        action="/forgot-password"
+                        method="POST"
+                        class="forgot-password-form"
                     >
-
-                    <div class="forgot-password-field">
-
-                        <label for="email">
-                            Email address
-                        </label>
 
                         <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            autocomplete="email"
-                            placeholder="you@example.com"
-                            required
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>"
                         >
 
+                        <div class="forgot-password-field">
+
+                            <label for="email">
+                                Email address
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                autocomplete="email"
+                                placeholder="you@example.com"
+                                required
+                            >
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="forgot-password-button"
+                        >
+                            Send reset link
+                        </button>
+
+                    </form>
+
+                    <div class="forgot-password-divider">
+                        <span>or</span>
                     </div>
 
-                    <button
-                        type="submit"
-                        class="forgot-password-button"
-                    >
-                        Send reset link
-                    </button>
+                    <p class="forgot-password-login">
 
-                </form>
+                        Remember your password?
 
-                <div class="forgot-password-divider">
-                    <span>or</span>
-                </div>
+                        <a href="/login">
+                            Back to login
+                        </a>
 
-                <p class="forgot-password-login">
+                    </p>
 
-                    Remember your password?
-
-                    <a href="/login">
-                        Back to login
-                    </a>
-
-                </p>
+                <?php endif; ?>
 
             </div>
 

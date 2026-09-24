@@ -24,7 +24,11 @@ class AuthController
 		if (!Csrf::validate($_POST['csrf_token'] ?? null)) //$_POST es un array especial que PHP crea automáticamente cuando recibe datos enviados mediante el método HTTP POST
 		{
 			http_response_code(403);
-			echo 'Invalid CSRF token.';
+
+			$errorTitle = 'Security error';
+			$errorMessage = 'The security token is invalid or has expired.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -43,9 +47,10 @@ class AuthController
 		{
 			http_response_code(400);
 
-			foreach ($errors as $error)
-				echo '<p>' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</p>';
+			$errorTitle = 'Invalid login';
+			$errorMessage = implode(' ', $errors);
 
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -67,21 +72,33 @@ class AuthController
 		if ($user === false)
 		{
 			http_response_code(401);
-			echo 'Invalid username or password.';
+
+			$errorTitle = 'Login failed';
+			$errorMessage = 'Invalid username or password.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if (!$user['email_verified'])
 		{
 			http_response_code(403);
-			echo 'Please verify your email address before logging in.';
+
+			$errorTitle = 'Email not verified';
+			$errorMessage = 'Please verify your email address before logging in.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if (!password_verify($password, $user['password']))
 		{
 			http_response_code(401);
-			echo 'Invalid username or password.';
+
+			$errorTitle = 'Login failed';
+			$errorMessage = 'Invalid username or password.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -110,7 +127,11 @@ class AuthController
 		if (!Csrf::validate($_POST['csrf_token'] ?? null))
 		{
 			http_response_code(403);
-			echo 'Invalid CSRF token.';
+
+			$errorTitle = 'Security error';
+			$errorMessage = 'The security token is invalid or has expired.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -141,9 +162,10 @@ class AuthController
 		{
 			http_response_code(400);
 
-			foreach ($errors as $error)
-				echo '<p>' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</p>';
+			$errorTitle = 'Invalid registration';
+			$errorMessage = implode(' ', $errors);
 
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -160,7 +182,11 @@ class AuthController
 		if ($stmt->fetch() !== false)
 		{
 			http_response_code(409);
-			echo 'Username or email already exists.';
+
+			$errorTitle = 'Account already exists';
+			$errorMessage = 'The username or email address is already in use.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -211,13 +237,16 @@ class AuthController
 			]);
 
 			http_response_code(500);
-			echo 'Unable to send verification email.';
+
+			$errorTitle = 'Registration error';
+			$errorMessage = 'Unable to send verification email.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
-		echo '<h1>Registration successful.</h1>';
-		echo '<p>Please check your email to verify your account.</p>';
-		echo '<p><a href="/login">Back to login</a></p>';
+		require __DIR__ . '/../Views/auth/registration-success.php';
+		exit;
 	}
 
 	public function verify(): void
@@ -227,7 +256,11 @@ class AuthController
 		if ($token === '')
 		{
 			http_response_code(400);
-			echo 'Invalid verification link.';
+
+			$errorTitle = 'Invalid verification link';
+			$errorMessage = 'The verification link is invalid.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -249,14 +282,22 @@ class AuthController
 		if ($user === false)
 		{
 			http_response_code(400);
-			echo 'Invalid verification link.';
+
+			$errorTitle = 'Invalid verification link';
+			$errorMessage = 'The verification link is invalid or has already been used.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if ($user['verification_expires_at'] === null || strtotime($user['verification_expires_at']) < time())
 		{
 			http_response_code(400);
-			echo 'Verification link has expired.';
+
+			$errorTitle = 'Verification link expired';
+			$errorMessage = 'This verification link has expired. Please register again.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -290,23 +331,34 @@ class AuthController
 		if (!Csrf::validate($_POST['csrf_token'] ?? null))
 		{
 			http_response_code(403);
-			echo 'Invalid CSRF token.';
+
+			$errorTitle = 'Security error';
+			$errorMessage = 'The security token is invalid or has expired.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		$email = trim($_POST['email'] ?? '');
-
 		if ($email === '')
 		{
 			http_response_code(400);
-			echo 'Email is required.';
+
+			$errorTitle = 'Invalid email address';
+			$errorMessage = 'Email is required.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if (!filter_var($email, FILTER_VALIDATE_EMAIL))
 		{
 			http_response_code(400);
-			echo 'Invalid email address.';
+
+			$errorTitle = 'Invalid email address';
+			$errorMessage = 'Please enter a valid email address.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -328,19 +380,15 @@ class AuthController
 		//enviamos el mismo mensaje tanto si existe el correo o no por seguiridad y no dar señales de si existe o no el correo
 		$message = 'If an account exists with that email address, a password reset link has been sent.';
 
-		if ($user === false)
+		if ($user === false || !$user['email_verified'])
 		{
-			echo '<h1>Password reset</h1>';
-			echo '<p>' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</p>';
-			echo '<p><a href="/login">Back to login</a></p>';
-			exit;
-		}
+			Session::start();
 
-		if (!$user['email_verified'])
-		{
-			echo '<h1>Password reset</h1>';
-			echo '<p>' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</p>';
-			echo '<p><a href="/login">Back to login</a></p>';
+			$csrfToken = Csrf::token();
+
+			$message = 'If an account exists with that email address, a password reset link has been sent.';
+
+			require __DIR__ . '/../Views/auth/forgot-password.php';
 			exit;
 		}
 
@@ -380,7 +428,11 @@ class AuthController
 		if ($userData === false)
 		{
 			http_response_code(500);
-			echo 'Unable to process password reset.';
+
+			$errorTitle = 'Password reset error';
+			$errorMessage = 'Unable to process the password reset request.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -400,18 +452,21 @@ class AuthController
 			]);
 
 			http_response_code(500);
-			echo 'Unable to send password reset email.';
+
+			$errorTitle = 'Password reset error';
+			$errorMessage = 'Unable to send password reset email.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
-		echo '<h1>Password reset</h1>';
+		Session::start();
 
-		echo '<p>'
-			. htmlspecialchars($message, ENT_QUOTES, 'UTF-8')
-			. '</p>';
+		$csrfToken = Csrf::token();
 
-		echo '<p><a href="/login">Back to login</a></p>';
+		$message = 'If an account exists with that email address, a password reset link has been sent.';
 
+		require __DIR__ . '/../Views/auth/forgot-password.php';
 		exit;
 	}
 
@@ -422,7 +477,11 @@ class AuthController
 		if ($token === '')
 		{
 			http_response_code(400);
-			echo 'Invalid password reset link.';
+
+			$errorTitle = 'Invalid password reset link';
+			$errorMessage = 'The password reset link is invalid.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -444,14 +503,22 @@ class AuthController
 		if ($user === false)
 		{
 			http_response_code(400);
-			echo 'Invalid password reset link.';
+
+			$errorTitle = 'Invalid password reset link';
+			$errorMessage = 'The password reset link is invalid or has already been used.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if ($user['password_reset_expires_at'] === null || strtotime($user['password_reset_expires_at']) < time())
 		{
 			http_response_code(400);
-			echo 'Password reset link has expired.';
+
+			$errorTitle = 'Password reset link expired';
+			$errorMessage = 'This password reset link has expired. Please request a new one.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -467,7 +534,11 @@ class AuthController
 		if (!Csrf::validate($_POST['csrf_token'] ?? null))
 		{
 			http_response_code(403);
-			echo 'Invalid CSRF token.';
+
+			$errorTitle = 'Security error';
+			$errorMessage = 'The security token is invalid or has expired.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -478,29 +549,44 @@ class AuthController
 		if ($token === '')
 		{
 			http_response_code(400);
-			echo 'Invalid password reset link.';
+
+			$errorTitle = 'Invalid password reset link';
+			$errorMessage = 'The password reset link is invalid.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if ($password === '')
 		{
 			http_response_code(400);
-			echo 'Password is required.';
+
+			$errorTitle = 'Invalid password';
+			$errorMessage = 'Password is required.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
-
 		$passwordError = PasswordValidator::validate($password);
 		if ($passwordError !== null)
 		{
 			http_response_code(400);
-			echo htmlspecialchars($passwordError, ENT_QUOTES, 'UTF-8');
+
+			$errorTitle = 'Invalid password';
+			$errorMessage = $passwordError;
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if ($password !== $passwordConfirmation)
 		{
 			http_response_code(400);
-			echo 'Passwords do not match.';
+
+			$errorTitle = 'Passwords do not match';
+			$errorMessage = 'The two passwords must be identical.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -522,14 +608,22 @@ class AuthController
 		if ($user === false)
 		{
 			http_response_code(400);
-			echo 'Invalid password reset link.';
+
+			$errorTitle = 'Invalid password reset link';
+			$errorMessage = 'The password reset link is invalid or has already been used.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if ($user['password_reset_expires_at'] === null || strtotime($user['password_reset_expires_at']) < time())
 		{
 			http_response_code(400);
-			echo 'Password reset link has expired.';
+
+			$errorTitle = 'Password reset link expired';
+			$errorMessage = 'This password reset link has expired. Please request a new one.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -559,7 +653,11 @@ class AuthController
 		if (!Csrf::validate($_POST['csrf_token'] ?? null))
 		{
 			http_response_code(403);
-			echo 'Invalid CSRF token.';
+
+			$errorTitle = 'Security error';
+			$errorMessage = 'The security token is invalid or has expired.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
