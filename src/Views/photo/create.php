@@ -204,6 +204,52 @@
 
                 </section>
 
+                <!-- PHOTO PREVIEW -->
+                <section
+                    id="photo-preview-section"
+                    class="photo-preview-section"
+                    hidden
+                >
+
+                    <div class="photo-section-heading">
+
+                        <div>
+
+                            <p>
+                                PREVIEW
+                            </p>
+
+                            <h2>
+                                Your photo
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+                    <div class="photo-preview-container">
+
+                        <canvas
+                            id="photo-preview-canvas"
+                        ></canvas>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        id="submit-photo"
+                        class="photo-submit-button"
+                        disabled
+                    >
+                        Upload photo
+                    </button>
+
+                    <p class="photo-preview-help">
+                        Select an overlay to continue.
+                    </p>
+
+                </section>
+
                 <!-- CONTROLS -->
                 <aside class="photo-create-controls">
 
@@ -1003,6 +1049,20 @@
         type="hidden"
         id="selected-overlay"
         name="overlay"
+        value=""
+    >
+
+    <input
+        type="hidden"
+        id="overlay-x"
+        name="overlay_x"
+        value=""
+    >
+
+    <input
+        type="hidden"
+        id="overlay-y"
+        name="overlay_y"
         value=""
     >
 

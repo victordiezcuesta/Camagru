@@ -3914,6 +3914,7 @@ PHOTO CREATE
 /* ---------------- SECTIONS ---------------- */
 .photo-overlay-section,
 .photo-upload-section,
+.photo-preview-section,
 .photo-previous-section {
     padding: 20px;
 
@@ -4177,6 +4178,90 @@ PHOTO CREATE
     font-size: 10px;
 }
 
+/* ---------------- PHOTO PREVIEW ---------------- */
+.photo-preview-section {
+    padding: 20px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+
+    box-shadow:
+        0 6px 22px rgba(0, 0, 0, 0.04);
+}
+
+.photo-preview-container {
+    width: 100%;
+
+    overflow: hidden;
+
+    background: #111827;
+
+    border-radius: 10px;
+}
+
+.photo-preview-container canvas {
+    display: block;
+
+    width: 100%;
+    height: auto;
+}
+
+.photo-submit-button {
+    width: 100%;
+
+    min-height: 44px;
+
+    margin-top: 16px;
+
+    padding: 0 18px;
+
+    border: 1px solid #111827;
+    border-radius: 8px;
+
+    background: #111827;
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.photo-submit-button:hover:not(:disabled) {
+    background: #000000;
+
+    border-color: #000000;
+
+    transform: translateY(-1px);
+}
+
+.photo-submit-button:disabled {
+    opacity: 0.35;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+.photo-preview-help {
+    margin-top: 10px;
+
+    color: #9ca3af;
+
+    font-size: 10px;
+
+    text-align: center;
+}
+
 /* ---------------- PREVIOUS PHOTOS ---------------- */
 .photo-previous-grid {
     display: grid;
@@ -4285,6 +4370,7 @@ PHOTO CREATE
 .photo-camera-start:focus-visible,
 .photo-camera-capture:focus-visible,
 .photo-upload-button:focus-visible,
+.photo-submit-button:focus-visible,
 .delete-photo-button:focus-visible {
     outline: 3px solid rgba(17, 24, 39, 0.18);
 

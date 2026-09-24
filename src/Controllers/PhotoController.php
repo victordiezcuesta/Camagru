@@ -67,18 +67,34 @@ class PhotoController
 		}
 
 		$overlay = $_POST['overlay'] ?? ''; //busca el overlay seleccionado desde el js y el html
-		/*if ($overlay === '')
+		if ($overlay === '')
 		{
 			http_response_code(400);
 			echo 'Overlay is required.';
 			exit;
-		}*/
+		}
+
+		$overlayX = null;
+		$overlayY = null;
+
+		if (isset($_POST['overlay_x'], $_POST['overlay_y']))
+		{
+			$overlayX = filter_var($_POST['overlay_x'], FILTER_VALIDATE_INT);
+			$overlayY = filter_var($_POST['overlay_y'], FILTER_VALIDATE_INT);
+
+			if ($overlayX === false || $overlayY === false)
+			{
+				http_response_code(400);
+				echo 'Invalid overlay position.';
+				exit;
+			}
+		}
 
 		$imageService = new ImageService();
 
 		try
 		{
-			$filename = $imageService->saveUploadedImage($_FILES['image'], $overlay);
+			$filename = $imageService->saveUploadedImage($_FILES['image'], $overlay, $overlayX, $overlayY);
 		}
 		catch (RuntimeException $exception)
 		{

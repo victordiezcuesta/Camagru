@@ -56,7 +56,7 @@ class ImageService
 	private const OVERLAY_SIZE = 500;
 	private const OVERLAY_MARGIN = 300;
 
-	public function saveUploadedImage(array $file, string $overlay): string
+	public function saveUploadedImage(array $file, string $overlay, ?int $overlayX = null, ?int $overlayY = null): string
 	{
 		if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK)
 			throw new RuntimeException('Unable to upload image.');
@@ -137,8 +137,32 @@ class ImageService
 					]
 				];
 
-				$position = $positions[random_int(0, 3)];
-				imagecopy($sourceImage, $overlayImage, $position['x'], $position['y'], 0, 0, $overlayWidth, $overlayHeight);
+				if ($overlayX === null || $overlayY === null)
+				{
+					imagedestroy($overlayImage);
+					imagedestroy($sourceImage);
+					throw new RuntimeException('Invalid overlay position.');
+				}
+
+				$validPosition = false;
+
+				foreach ($positions as $position)
+				{
+					if ($position['x'] === $overlayX && $position['y'] === $overlayY)
+					{
+						$validPosition = true;
+						break;
+					}
+				}
+
+				if (!$validPosition)
+				{
+					imagedestroy($overlayImage);
+					imagedestroy($sourceImage);
+					throw new RuntimeException('Invalid overlay position.');
+				}
+
+				imagecopy($sourceImage, $overlayImage, $overlayX, $overlayY, 0, 0, $overlayWidth, $overlayHeight);
 			}
 			else
 			{

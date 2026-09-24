@@ -9,13 +9,20 @@ const cameraMessage = document.getElementById('camera-message');
 const cameraError = document.getElementById('camera-error');
 const canvas = document.getElementById('photo-canvas');
 const imageInput = document.getElementById('image');
+const previewCanvas = document.getElementById('photo-preview-canvas');
+const previewSection = document.getElementById('photo-preview-section');
+const submitPhotoButton = document.getElementById('submit-photo');
 const photoForm = document.getElementById('photo-form');
 const selectedOverlayInput = document.getElementById('selected-overlay');
+const overlayXInput = document.getElementById('overlay-x');
+const overlayYInput = document.getElementById('overlay-y');
 const overlayOptions = document.querySelectorAll('.overlay-option');
 
 // variables que podemos editar porque no son const
 let cameraStream = null;
 let selectedOverlay = null;
+let selectedImage = null;
+let selectedOverlayPosition = null;
 
 function showError(message)
 {
@@ -29,6 +36,165 @@ function clearError()
 	cameraError.hidden = true;
 }
 
+function updatePreview()
+{
+	if (selectedImage === null)
+	{
+		previewSection.hidden = true;
+		updateCameraButtons();
+		return;
+	}
+
+	const imageUrl = URL.createObjectURL(selectedImage);
+
+	const image = new Image();
+
+	image.onload = function ()
+	{
+		URL.revokeObjectURL(imageUrl);
+		const originalWidth = image.naturalWidth;
+		const originalHeight = image.naturalHeight;
+		const scale = Math.min(1920 / originalWidth, 1440 / originalHeight, 1);
+		const width = Math.round(originalWidth * scale);
+		const height = Math.round(originalHeight * scale);
+
+		previewCanvas.width = width;
+		previewCanvas.height = height;
+
+		const context = previewCanvas.getContext('2d');
+
+		if (context === null)
+		{
+			showError('Unable to create the preview.');
+			return;
+		}
+
+		context.clearRect(0, 0, width, height);
+
+		//Dibujamos la imagen exactamente con las mismas dimensiones que utilizará ImageService.
+		context.drawImage(image, 0, 0, width, height);
+
+		if (selectedOverlay === null)
+		{
+			previewSection.hidden = false;
+			updateCameraButtons();
+			return;
+		}
+
+		const overlayImage = new Image();
+
+		overlayImage.onload = function ()
+		{
+			const overlayNumber = parseInt(selectedOverlay, 10);
+
+			if (overlayNumber >= 1 && overlayNumber <= 20)
+			{
+				const overlayWidth = 500;
+				const overlayHeight = 500;
+				const margin = 300;
+
+				if (selectedOverlayPosition === null)
+				{
+					const positions = [
+						{
+							x: margin,
+							y: margin
+						},
+						{
+							x: margin,
+							y: Math.max(0, height - overlayHeight - margin)
+						},
+						{
+							x: Math.max(0, width - overlayWidth - margin),
+							y: margin
+						},
+						{
+							x: Math.max(0, width - overlayWidth - margin),
+							y: Math.max(0, height - overlayHeight - margin)
+						}
+					];
+
+					selectedOverlayPosition = positions[
+						Math.floor(
+							Math.random() * positions.length
+						)
+					];
+				}
+
+				//Guardamos la posición para enviársela posteriormente a PHP.
+				overlayXInput.value = selectedOverlayPosition.x;
+
+				overlayYInput.value = selectedOverlayPosition.y;
+
+				context.drawImage(overlayImage, 0, 0, overlayWidth, overlayHeight, selectedOverlayPosition.x, selectedOverlayPosition.y, overlayWidth, overlayHeight);
+			}
+			else
+			{
+				//Los overlays 21-23 y 101-105 ocupan toda la imagen, igual que en PHP.
+				overlayXInput.value = '';
+				overlayYInput.value = '';
+
+				context.drawImage(overlayImage, 0, 0, width, height);
+			}
+
+			previewSection.hidden = false;
+			updateCameraButtons();
+		};
+
+		overlayImage.onerror = function ()
+		{
+			showError('Unable to load the selected overlay.');
+		};
+
+		overlayImage.src = '/assets/overlays/' + getOverlayFilename(selectedOverlay);
+	};
+
+	image.onerror = function ()
+	{
+		URL.revokeObjectURL(imageUrl);
+		showError('Unable to create the preview.');
+	};
+
+	image.src = imageUrl;
+	updateCameraButtons();
+}
+
+function getOverlayFilename(overlay)
+{
+	const overlays = {
+		'01': '01_laptop_programacion.png',
+		'02': '02_42_madrid.png',
+		'03': '03_devs_no_duermen.png',
+		'04': '04_gaming.png',
+		'05': '05_viajes_montana.png',
+		'06': '06_cafe_programador.png',
+		'07': '07_minecraft_pixel.png',
+		'08': '08_linux_forever.png',
+		'09': '09_ramen.png',
+		'10': '10_tu_puedes.png',
+		'11': '11_tiburon_good_vibes.png',
+		'12': '12_astroespacio.png',
+		'13': '13_terminal_keep_going.png',
+		'14': '14_good_boy_42.png',
+		'15': '15_disciplina_montana.png',
+		'16': '16_coder_sonoliento.png',
+		'17': '17_banana_lets_go.png',
+		'18': '18_42_cursor.png',
+		'19': '19_pizza.png',
+		'20': '20_cactus.png',
+		'21': '21_dog.png',
+		'22': '22_gafas_bigote.png',
+		'23': '23_ojos.png',
+		'101': '101_playa_tropical.png',
+		'102': '102_romantico_kawaii.png',
+		'103': '103_cine_film.png',
+		'104': '104_aventura_montana.png',
+		'105': '105_halloween.png'
+	};
+
+	return overlays[overlay];
+}
+
 function updateCameraButtons()
 {
 	const cameraActive = cameraStream !== null;
@@ -37,7 +203,9 @@ function updateCameraButtons()
 
 	stopCameraButton.disabled = !cameraActive;
 
-	takePictureButton.disabled = !cameraActive || selectedOverlay === null; //El botón "Take Picture" solamente puede utilizarse cuando tengo cámara + overlay.
+	takePictureButton.disabled = !cameraActive || selectedOverlay === null;
+
+	submitPhotoButton.disabled = selectedImage === null || selectedOverlay === null;//El botón "Take Picture" solamente puede utilizarse cuando tengo cámara + overlay.
 }
 
 async function startCamera() //función asíncrona: El navegador tiene que: 1. pedir permiso; 2. acceder al hardware; 3. obtener el stream; 4. devolverlo.
@@ -107,8 +275,12 @@ function selectOverlay(button) //función se ejecuta cuando seleccionas un overl
 		selectedOverlay = null;
 		selectedOverlayInput.value = '';
 
+		selectedOverlayPosition = null;
+		overlayXInput.value = '';
+		overlayYInput.value = '';
+
 		clearError();
-		updateCameraButtons();
+		updatePreview();
 
 		return;
 	}
@@ -127,9 +299,12 @@ function selectOverlay(button) //función se ejecuta cuando seleccionas un overl
 	selectedOverlay = overlay;
 	selectedOverlayInput.value = selectedOverlay;
 
+	selectedOverlayPosition = null;
+
 	clearError();
-	updateCameraButtons();
+	updatePreview();
 }
+
 function takePicture()
 {
 	if (cameraStream === null)
@@ -180,8 +355,8 @@ function takePicture()
 			const dataTransfer = new DataTransfer();
 			dataTransfer.items.add(file);
 			imageInput.files = dataTransfer.files;
-
-			photoForm.submit();
+			selectedImage = file;
+			updatePreview();
 		},
 		'image/jpeg',
 		0.9 //la calidad de la imagen, es hasta 1 asique es muy bunea calidad
@@ -191,12 +366,6 @@ function takePicture()
 function uploadImage() //subir una foto existente
 {
 	clearError();
-
-	if (selectedOverlay === null)
-	{
-		showError('Please choose an overlay first.');
-		return;
-	}
 
 	imageInput.click();
 }
@@ -214,10 +383,39 @@ imageInput.addEventListener(
 		{
 			showError('Please select a JPEG or PNG image.');
 			imageInput.value = '';
+			selectedImage = null;
+			updatePreview();
+			return;
+		}
+		clearError();
+		selectedImage = file;
+		updatePreview();
+	}
+);
+
+submitPhotoButton.addEventListener(
+	'click',
+	function ()
+	{
+		clearError();
+
+		if (selectedImage === null)
+		{
+			showError('Please take or upload an image.');
 			return;
 		}
 
-		clearError();
+		if (selectedOverlay === null)
+		{
+			showError('Please choose an overlay first.');
+			return;
+		}
+
+		if (imageInput.files.length === 0)
+		{
+			showError('Please select an image.');
+			return;
+		}
 
 		photoForm.submit();
 	}
