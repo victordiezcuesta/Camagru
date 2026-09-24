@@ -990,6 +990,23 @@ LOGIN
     text-decoration: underline;
 }
 
+/* Error page button */
+.login-card .login-button {
+    display: block;
+
+    width: fit-content;
+
+    margin: 0 auto;
+
+    padding: 0 30px;
+
+    text-align: center;
+
+    text-decoration: none;
+
+    line-height: 46px;
+}
+
 /* Login responsive */
 @media (max-width: 520px) {
 
