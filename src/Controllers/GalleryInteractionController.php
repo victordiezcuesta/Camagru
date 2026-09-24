@@ -16,7 +16,11 @@ class GalleryInteractionController
 		if (!isset($_SESSION['user_id']))
 		{
 			http_response_code(403);
-			echo 'Authentication required.';
+
+			$errorTitle = 'Authentication required';
+			$errorMessage = 'You must be logged in to perform this action.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 	}
@@ -28,16 +32,23 @@ class GalleryInteractionController
 		if (!Csrf::validate($_POST['csrf_token'] ?? null))
 		{
 			http_response_code(403);
-			echo 'Invalid CSRF token.';
+
+			$errorTitle = 'Invalid request';
+			$errorMessage = 'The security token is invalid or has expired. Please try again.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		$imageId = filter_input(INPUT_POST, 'image_id', FILTER_VALIDATE_INT);
-
 		if ($imageId === false || $imageId === null || $imageId < 1)
 		{
 			http_response_code(400);
-			echo 'Invalid image.';
+
+			$errorTitle = 'Invalid image';
+			$errorMessage = 'The selected image is not valid.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -57,7 +68,11 @@ class GalleryInteractionController
 		if ($stmt->fetch() === false)
 		{
 			http_response_code(404);
-			echo 'Image not found.';
+
+			$errorTitle = 'Image not found';
+			$errorMessage = 'The requested image could not be found.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -117,7 +132,11 @@ class GalleryInteractionController
 		if (!Csrf::validate($_POST['csrf_token'] ?? null))
 		{
 			http_response_code(403);
-			echo 'Invalid CSRF token.';
+
+			$errorTitle = 'Invalid request';
+			$errorMessage = 'The security token is invalid or has expired. Please try again.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -126,20 +145,32 @@ class GalleryInteractionController
 		if ($imageId === false || $imageId === null || $imageId < 1)
 		{
 			http_response_code(400);
-			echo 'Invalid image.';
+
+			$errorTitle = 'Invalid image';
+			$errorMessage = 'The selected image is not valid.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 		if ($content === '')
 		{
 			http_response_code(400);
-			echo 'Comment cannot be empty.';
+
+			$errorTitle = 'Invalid comment';
+			$errorMessage = 'The comment cannot be empty.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if (mb_strlen($content) > 1000)
 		{
 			http_response_code(400);
-			echo 'Comment must contain at most 1000 characters.';
+
+			$errorTitle = 'Invalid comment';
+			$errorMessage = 'The comment must contain at most 1000 characters.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -167,7 +198,11 @@ class GalleryInteractionController
 		if ($image === false)
 		{
 			http_response_code(404);
-			echo 'Image not found.';
+
+			$errorTitle = 'Image not found';
+			$errorMessage = 'The requested image could not be found.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
-        Camagru - <?= htmlspecialchars($errorTitle, ENT_QUOTES, 'UTF-8') ?>
+        Camagru - <?= htmlspecialchars($successTitle, ENT_QUOTES, 'UTF-8') ?>
     </title>
 
     <link rel="stylesheet" href="/assets/css/style.css">
@@ -32,7 +32,7 @@
                     Gallery
                 </a>
 
-                <a href="/login" class="nav-link active" aria-current="page">
+                <a href="/login" class="nav-link">
                     Login
                 </a>
 
@@ -59,11 +59,11 @@
                     </p>
 
                     <h1>
-                        <?= htmlspecialchars($errorTitle, ENT_QUOTES, 'UTF-8') ?>
+                        <?= htmlspecialchars($successTitle, ENT_QUOTES, 'UTF-8') ?>
                     </h1>
 
                     <p class="login-description">
-                        <?= htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') ?>
+                        <?= htmlspecialchars($successMessage, ENT_QUOTES, 'UTF-8') ?>
                     </p>
 
                 </div>
@@ -71,12 +71,11 @@
                 <div class="login-card">
 
                     <p class="login-register">
-                        If you need to continue, return to the previous page
-                        or go back to the Home page.
+                        You can return to your profile.
                     </p>
 
-                    <a href="/" class="login-button">
-                        Home
+                    <a href="/profile" class="login-button">
+                        Back to profile
                     </a>
 
                 </div>

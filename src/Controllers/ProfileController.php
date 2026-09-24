@@ -65,7 +65,11 @@ class ProfileController
 		if (!Csrf::validate($_POST['csrf_token'] ?? null))
 		{
 			http_response_code(403);
-			echo 'Invalid CSRF token.';
+
+			$errorTitle = 'Invalid request';
+			$errorMessage = 'The security token is invalid or has expired. Please try again.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -74,14 +78,22 @@ class ProfileController
 		if ($username === '')
 		{
 			http_response_code(400);
-			echo 'Username is required.';
+
+			$errorTitle = 'Username required';
+			$errorMessage = 'Please enter a username.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if (strlen($username) > 50)
 		{
 			http_response_code(400);
-			echo 'Username must contain at most 50 characters.';
+
+			$errorTitle = 'Invalid username';
+			$errorMessage = 'The username must contain at most 50 characters.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -103,7 +115,11 @@ class ProfileController
 		if ($stmt->fetch() !== false)
 		{
 			http_response_code(409);
-			echo 'Username already exists.';
+
+			$errorTitle = 'Username unavailable';
+			$errorMessage = 'This username is already in use. Please choose another one.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -131,7 +147,11 @@ class ProfileController
 		if (!Csrf::validate($_POST['csrf_token'] ?? null))
 		{
 			http_response_code(403);
-			echo 'Invalid CSRF token.';
+
+			$errorTitle = 'Invalid request';
+			$errorMessage = 'The security token is invalid or has expired. Please try again.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -140,21 +160,33 @@ class ProfileController
 		if ($email === '')
 		{
 			http_response_code(400);
-			echo 'Email is required.';
+
+			$errorTitle = 'Email required';
+			$errorMessage = 'Please enter an email address.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if (!filter_var($email, FILTER_VALIDATE_EMAIL))
 		{
 			http_response_code(400);
-			echo 'Invalid email address.';
+
+			$errorTitle = 'Invalid email';
+			$errorMessage = 'Please enter a valid email address.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if (strlen($email) > 255)
 		{
 			http_response_code(400);
-			echo 'Email address is too long.';
+
+			$errorTitle = 'Invalid email';
+			$errorMessage = 'The email address is too long.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -175,14 +207,22 @@ class ProfileController
 		if ($currentUser === false)
 		{
 			http_response_code(404);
-			echo 'User not found.';
+
+			$errorTitle = 'User not found';
+			$errorMessage = 'The requested user could not be found.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if ($email === $currentUser['email'])
 		{
 			http_response_code(400);
-			echo 'The new email address must be different.';
+
+			$errorTitle = 'Email unchanged';
+			$errorMessage = 'The new email address must be different from the current one.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -201,7 +241,11 @@ class ProfileController
 		if ($stmt->fetch() !== false)
 		{
 			http_response_code(409);
-			echo 'Email already exists.';
+
+			$errorTitle = 'Email unavailable';
+			$errorMessage = 'This email address is already in use. Please choose another one.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -249,15 +293,18 @@ class ProfileController
 			]);
 
 			http_response_code(500);
-			echo 'Unable to send email verification message.';
+
+			$errorTitle = 'Email verification failed';
+			$errorMessage = 'Unable to send the email verification message. Please try again later.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
-		echo '<h1>Email change requested.</h1>';
-		echo '<p>Please check your new email address and verify it.</p>';
-		echo '<p>The verification link will expire in 24 hours.</p>';
-		echo '<p><a href="/profile">Back to profile</a></p>';
+		$successTitle = 'Email change requested';
+		$successMessage = 'Please check your new email address and verify it. The verification link will expire in 24 hours.';
 
+		require __DIR__ . '/../Views/success.php';
 		exit;
 	}
 
@@ -268,7 +315,11 @@ class ProfileController
 		if (!Csrf::validate($_POST['csrf_token'] ?? null))
 		{
 			http_response_code(403);
-			echo 'Invalid CSRF token.';
+
+			$errorTitle = 'Invalid request';
+			$errorMessage = 'The security token is invalid or has expired. Please try again.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -279,14 +330,22 @@ class ProfileController
 		if ($currentPassword === '')
 		{
 			http_response_code(400);
-			echo 'Current password is required.';
+
+			$errorTitle = 'Current password required';
+			$errorMessage = 'Please enter your current password.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if ($password === '')
 		{
 			http_response_code(400);
-			echo 'New password is required.';
+
+			$errorTitle = 'New password required';
+			$errorMessage = 'Please enter a new password.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -294,14 +353,22 @@ class ProfileController
 		if ($passwordError !== null)
 		{
 			http_response_code(400);
-			echo htmlspecialchars($passwordError, ENT_QUOTES, 'UTF-8');
+
+			$errorTitle = 'Invalid password';
+			$errorMessage = $passwordError;
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if ($password !== $passwordConfirmation)
 		{
 			http_response_code(400);
-			echo 'Passwords do not match.';
+
+			$errorTitle = 'Passwords do not match';
+			$errorMessage = 'The new password and its confirmation must match.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -323,21 +390,26 @@ class ProfileController
 		if ($user === false)
 		{
 			http_response_code(404);
-			echo 'User not found.';
+
+			$errorTitle = 'User not found';
+			$errorMessage = 'The requested user could not be found.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if (!password_verify($currentPassword, $user['password']))
 		{
 			http_response_code(401);
-			echo 'Current password is incorrect.';
+
+			$errorTitle = 'Incorrect password';
+			$errorMessage = 'The current password is incorrect.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
-		$passwordHash = password_hash(
-			$password,
-			PASSWORD_DEFAULT
-		);
+		$passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
 		$stmt = $pdo->prepare(
 			'UPDATE users
@@ -361,7 +433,11 @@ class ProfileController
 		if (!Csrf::validate($_POST['csrf_token'] ?? null))
 		{
 			http_response_code(403);
-			echo 'Invalid CSRF token.';
+
+			$errorTitle = 'Invalid request';
+			$errorMessage = 'The security token is invalid or has expired. Please try again.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 

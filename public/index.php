@@ -153,4 +153,8 @@ if ($path === '/gallery/comment' && $method === 'POST')
 
 http_response_code(404);
 
-echo '404 - Page not found';
+$errorTitle = 'Page not found';
+$errorMessage = 'The requested page could not be found.';
+
+require __DIR__ . '/../src/Views/error.php';
+exit;

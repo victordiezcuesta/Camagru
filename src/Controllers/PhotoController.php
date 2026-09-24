@@ -55,14 +55,22 @@ class PhotoController
 		if (!Csrf::validate($_POST['csrf_token'] ?? null))
 		{
 			http_response_code(403);
-			echo 'Invalid CSRF token.';
+
+			$errorTitle = 'Invalid request';
+			$errorMessage = 'The security token is invalid or has expired. Please try again.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
 		if (!isset($_FILES['image'])) //$_FILES =Es un array especial de PHP con información sobre el archivo
 		{
 			http_response_code(400);
-			echo 'Image is required.';
+
+			$errorTitle = 'Image required';
+			$errorMessage = 'Please select or capture an image before continuing.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -70,7 +78,11 @@ class PhotoController
 		if ($overlay === '')
 		{
 			http_response_code(400);
-			echo 'Overlay is required.';
+
+			$errorTitle = 'Overlay required';
+			$errorMessage = 'Please select an overlay before taking a photo.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -88,7 +100,11 @@ class PhotoController
 			if (!isset($_POST['overlay_x'], $_POST['overlay_y']))
 			{
 				http_response_code(400);
-				echo 'Invalid overlay position.';
+
+				$errorTitle = 'Invalid overlay position';
+				$errorMessage = 'The selected overlay position is invalid.';
+
+				require __DIR__ . '/../Views/error.php';
 				exit;
 			}
 
@@ -98,7 +114,11 @@ class PhotoController
 			if ($overlayX === false || $overlayY === false)
 			{
 				http_response_code(400);
-				echo 'Invalid overlay position.';
+
+				$errorTitle = 'Invalid overlay position';
+				$errorMessage = 'The selected overlay position is invalid.';
+
+				require __DIR__ . '/../Views/error.php';
 				exit;
 			}
 		}
@@ -112,7 +132,11 @@ class PhotoController
 		catch (RuntimeException $exception)
 		{
 			http_response_code(400);
-			echo htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8');
+
+			$errorTitle = 'Unable to process image';
+			$errorMessage = $exception->getMessage();
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -139,16 +163,16 @@ class PhotoController
 		}
 		catch (Throwable $exception)
 		{
-			$filepath =
-				__DIR__
-				. '/../../public/uploads/'
-				. $filename;
-
+			$filepath = __DIR__ . '/../../public/uploads/' . $filename;
 			if (is_file($filepath))
-				unlink($filepath); //borra el archivo que acabamos de subir.
+				unlink($filepath); //borra el archivo que acabmos de subir
 
 			http_response_code(500);
-			echo 'Unable to save image.';
+
+			$errorTitle = 'Unable to save image';
+			$errorMessage = 'The image could not be saved. Please try again.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -163,19 +187,23 @@ class PhotoController
 		if (!Csrf::validate($_POST['csrf_token'] ?? null))
 		{
 			http_response_code(403);
-			echo 'Invalid CSRF token.';
+
+			$errorTitle = 'Invalid request';
+			$errorMessage = 'The security token is invalid or has expired. Please try again.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
-		$imageId = filter_var(
-			$_POST['image_id'] ?? null,
-			FILTER_VALIDATE_INT
-		);
-
+		$imageId = filter_var($_POST['image_id'] ?? null, FILTER_VALIDATE_INT);
 		if ($imageId === false || $imageId <= 0)
 		{
 			http_response_code(400);
-			echo 'Invalid image.';
+
+			$errorTitle = 'Invalid image';
+			$errorMessage = 'The selected image is not valid.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -201,7 +229,11 @@ class PhotoController
 		if ($image === false)
 		{
 			http_response_code(404);
-			echo 'Image not found.';
+
+			$errorTitle = 'Image not found';
+			$errorMessage = 'The requested image could not be found.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -210,7 +242,11 @@ class PhotoController
 		if (basename($filename) !== $filename) //evita aceptar un nombre que intente salir de public/uploads/, por ejemplo mediante una ruta manipulada
 		{
 			http_response_code(500);
-			echo 'Invalid image filename.';
+
+			$errorTitle = 'Invalid image filename';
+			$errorMessage = 'The image filename is invalid.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
@@ -219,7 +255,11 @@ class PhotoController
 		if (is_file($filepath) && !unlink($filepath))
 		{
 			http_response_code(500);
-			echo 'Unable to delete image.';
+
+			$errorTitle = 'Unable to delete image';
+			$errorMessage = 'The image could not be deleted. Please try again.';
+
+			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
