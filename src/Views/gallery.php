@@ -19,6 +19,18 @@
         href="/assets/css/style.css"
     >
 
+    <script>
+
+        const galleryInfiniteModeFromStorage = localStorage.getItem('camagru-gallery-pagination-mode') === 'infinite';
+        const galleryHasPageParameter = new URLSearchParams(window.location.search).has('page');
+
+        if (galleryInfiniteModeFromStorage && galleryHasPageParameter)
+        {
+            window.location.replace('/gallery');
+        }
+
+    </script>
+
 </head>
 
 <body>
@@ -143,7 +155,32 @@
 
             <div class="gallery-container">
 
-                <?php if (empty($images)): ?>
+                <?php if ($invalidPage): ?>
+
+                    <div class="gallery-empty-state">
+
+                        <div class="gallery-empty-icon">
+                            !
+                        </div>
+
+                        <h2>
+                            Page not available
+                        </h2>
+
+                        <p>
+                            There are not enough photos to reach that page.
+                        </p>
+
+                        <a
+                            href="/gallery"
+                            class="gallery-primary-button"
+                        >
+                            Back to gallery
+                        </a>
+
+                    </div>
+
+                <?php elseif (empty($images)): ?>
 
                     <div class="gallery-empty-state">
 
@@ -314,10 +351,7 @@
 
         const galleryGrid = document.getElementById('gallery-grid');
 
-        const galleryTraditionalPagination =
-            document.getElementById(
-                'gallery-traditional-pagination'
-            );
+        const galleryTraditionalPagination = document.getElementById('gallery-traditional-pagination');
 
         const galleryInfiniteLoader =
             document.getElementById(

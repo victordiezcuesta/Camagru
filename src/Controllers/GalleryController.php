@@ -28,10 +28,11 @@ class GalleryController
 
 		$totalPages = max(1, (int) ceil($totalImages / self::IMAGES_PER_PAGE));
 
-		if ($page > $totalPages)
-			$page = $totalPages;
-
-		$images = $this->getImages($pdo, $page);
+		$invalidPage = $page > $totalPages;
+		if ($invalidPage)
+			$images = [];
+		else
+			$images = $this->getImages($pdo, $page);
 
 		require __DIR__ . '/../Views/gallery.php';
 	}
