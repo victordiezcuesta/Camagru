@@ -53,8 +53,8 @@ class ImageService
 		'16', '17', '18', '19', '20'
 	];
 
-	private const OVERLAY_SIZE = 500;
-	private const OVERLAY_MARGIN = 300;
+	private const OVERLAY_SIZE = 250;
+	private const OVERLAY_MARGIN = 10;
 
 	public function saveUploadedImage(array $file, string $overlay, ?int $overlayX = null, ?int $overlayY = null): string
 	{

@@ -66,8 +66,8 @@ function getProcessedCameraDimensions()
 
 function getCameraOverlayLayout(width, height)
 {
-	const maxOverlaySize = 500;
-	const maxMargin = 300;
+	const maxOverlaySize = 250;
+	const maxMargin = 10;
 
 	//Primero intentamos utilizar el mismo tamaño que utilizamos para las fotografías subidas.
 	let overlaySize = Math.min(maxOverlaySize, width, height);
