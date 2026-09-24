@@ -1,6 +1,7 @@
 //lo que hace es buscar en los archivos html del proyecto(que en este caso lo hace en el create.php porque es la que esta cargando)
 // lo que haya de camera o start-camera y luego les asigna una variable en el archivo .js que es camera o startCameraButton
 const camera = document.getElementById('camera');
+const liveOverlayCanvas = document.getElementById('live-overlay-canvas');
 const startCameraButton = document.getElementById('start-camera');
 const takePictureButton = document.getElementById('take-picture');
 const stopCameraButton = document.getElementById('stop-camera');
@@ -24,6 +25,8 @@ let cameraStream = null;
 let selectedOverlay = null;
 let selectedImage = null;
 let selectedOverlayPosition = null;
+let liveOverlayImage = null;
+let livePreviewAnimationFrame = null;
 
 function showError(message)
 {
@@ -35,6 +38,134 @@ function clearError()
 {
 	cameraError.textContent = '';
 	cameraError.hidden = true;
+}
+
+function clearLiveOverlay()
+{
+    const context = liveOverlayCanvas.getContext('2d');
+
+    if (context === null)
+        return;
+
+    context.clearRect(0, 0, liveOverlayCanvas.width, liveOverlayCanvas.height);
+}
+
+function updateLiveOverlay()
+{
+	if (cameraStream === null || camera.videoWidth === 0 || camera.videoHeight === 0 || selectedOverlay === null || liveOverlayImage === null || !liveOverlayImage.complete)
+	{
+		clearLiveOverlay();
+
+		livePreviewAnimationFrame = requestAnimationFrame(updateLiveOverlay);
+
+		return;
+	}
+
+	const containerWidth = liveOverlayCanvas.clientWidth;
+	const containerHeight = liveOverlayCanvas.clientHeight;
+
+	if (containerWidth === 0 || containerHeight === 0)
+	{
+		livePreviewAnimationFrame = requestAnimationFrame(updateLiveOverlay);
+
+		return;
+	}
+
+	liveOverlayCanvas.width = containerWidth;
+	liveOverlayCanvas.height = containerHeight;
+
+	const context = liveOverlayCanvas.getContext('2d');
+
+	if (context === null)
+	{
+		livePreviewAnimationFrame = requestAnimationFrame(updateLiveOverlay);
+
+		return;
+	}
+
+	context.clearRect(0, 0, containerWidth, containerHeight);
+
+	const videoWidth = camera.videoWidth;
+	const videoHeight = camera.videoHeight;
+
+	const scale = Math.max(containerWidth / videoWidth, containerHeight / videoHeight);
+
+	const displayedWidth = videoWidth * scale;
+	const displayedHeight = videoHeight * scale;
+
+	const offsetX = (containerWidth - displayedWidth) / 2;
+	const offsetY = (containerHeight - displayedHeight) / 2;
+
+	const overlayNumber = parseInt(selectedOverlay, 10);
+
+	if (overlayNumber >= 1 && overlayNumber <= 20)
+	{
+		const overlayWidth = 500;
+		const overlayHeight = 500;
+
+		if (selectedOverlayPosition === null)
+		{
+			const margin = 300;
+			const positions = [
+				{
+					x: margin,
+					y: margin
+				},
+				{
+					x: margin,
+					y: Math.max(0, videoHeight - overlayHeight - margin)
+				},
+				{
+					x: Math.max(0, videoWidth - overlayWidth - margin),
+					y: margin
+				},
+				{
+					x: Math.max(0, videoWidth - overlayWidth - margin),
+					y: Math.max(0, videoHeight - overlayHeight - margin)
+				}
+			];
+
+			selectedOverlayPosition = positions[
+			Math.floor(
+				Math.random() * positions.length
+			)
+			];
+
+			overlayXInput.value = selectedOverlayPosition.x;
+			overlayYInput.value = selectedOverlayPosition.y;
+		}
+
+		const x = offsetX + selectedOverlayPosition.x * scale;
+		const y = offsetY + selectedOverlayPosition.y * scale;
+
+		const width = overlayWidth * scale;
+		const height = overlayHeight * scale;
+
+		context.drawImage(liveOverlayImage, x, y, width, height);
+	}
+	else
+		context.drawImage(liveOverlayImage, offsetX, offsetY, displayedWidth, displayedHeight);
+
+	livePreviewAnimationFrame = requestAnimationFrame(updateLiveOverlay);
+}
+
+function startLiveOverlayPreview()
+{
+	if (livePreviewAnimationFrame !== null)
+		return;
+
+	livePreviewAnimationFrame = requestAnimationFrame(updateLiveOverlay);
+}
+
+function stopLiveOverlayPreview()
+{
+	if (livePreviewAnimationFrame !== null)
+	{
+		cancelAnimationFrame(livePreviewAnimationFrame);
+		livePreviewAnimationFrame = null;
+	}
+
+	clearLiveOverlay();
 }
 
 function openPhotoPreview()
@@ -57,6 +188,8 @@ function closePhotoPreview()
 
 	overlayXInput.value = '';
 	overlayYInput.value = '';
+
+	clearLiveOverlay();
 
 	const context = previewCanvas.getContext('2d');
 
@@ -258,6 +391,8 @@ async function startCamera() //función asíncrona: El navegador tiene que: 1. p
 		camera.srcObject = cameraStream;
 		cameraMessage.classList.add('is-hidden');
 
+		startLiveOverlayPreview();
+
 		updateCameraButtons();
 	}
 	catch (error)
@@ -287,6 +422,8 @@ function stopCamera()
 	cameraStream = null;
 	cameraMessage.classList.remove('is-hidden');
 
+	stopLiveOverlayPreview();
+
 	updateCameraButtons();
 }
 
@@ -304,8 +441,13 @@ function selectOverlay(button) //función se ejecuta cuando seleccionas un overl
 		selectedOverlayInput.value = '';
 
 		selectedOverlayPosition = null;
+
 		overlayXInput.value = '';
 		overlayYInput.value = '';
+
+		liveOverlayImage = null;
+
+		clearLiveOverlay();
 
 		clearError();
 		updatePreview();
@@ -329,8 +471,29 @@ function selectOverlay(button) //función se ejecuta cuando seleccionas un overl
 
 	selectedOverlayPosition = null;
 
+	overlayXInput.value = '';
+	overlayYInput.value = '';
+
 	clearError();
-	updatePreview();
+
+	liveOverlayImage = new Image();
+
+	liveOverlayImage.onload = function ()
+	{
+		startLiveOverlayPreview();
+		updatePreview();
+	};
+
+	liveOverlayImage.onerror = function ()
+	{
+		liveOverlayImage = null;
+
+		clearLiveOverlay();
+
+		showError('Unable to load the selected overlay.');
+	};
+
+	liveOverlayImage.src = '/assets/overlays/' + getOverlayFilename(selectedOverlay);
 }
 
 function takePicture()
@@ -496,6 +659,7 @@ window.addEventListener(
 	'beforeunload',
 	function ()
 	{
+		stopLiveOverlayPreview();
 		if (cameraStream !== null)
 		{
 			cameraStream.getTracks().forEach(

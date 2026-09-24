@@ -123,12 +123,16 @@
                 <section class="photo-camera-panel">
 
                     <div class="photo-camera-container">
-
                         <video
                             id="camera"
                             autoplay
                             playsinline
                         ></video>
+
+                        <canvas
+                            id="live-overlay-canvas"
+                            aria-hidden="true"
+                        ></canvas>
 
                         <div
                             id="camera-message"
