@@ -114,9 +114,14 @@ class ImageService
 
 			if (in_array($overlay, self::RANDOM_POSITION_OVERLAYS, true))
 			{
-				$overlayWidth = self::OVERLAY_SIZE;
-				$overlayHeight = self::OVERLAY_SIZE;
-				$margin = self::OVERLAY_MARGIN;
+				$overlayWidth = min(self::OVERLAY_SIZE, $width, $height);
+				$margin = min(self::OVERLAY_MARGIN, intdiv($width - $overlayWidth, 2), intdiv($height - $overlayWidth, 2));
+				if ($margin < 0)
+					$margin = 0;
+
+				$overlayWidth = min($overlayWidth, $width - ($margin * 2), $height - ($margin * 2));
+
+				$overlayHeight = $overlayWidth;
 
 				$positions = [
 					[

@@ -4549,7 +4549,7 @@ PHOTO CREATE
     }
 
     .photo-camera-container {
-        aspect-ratio: 3 / 4;
+        aspect-ratio: 4 / 3;
     }
 
     .photo-create-controls {

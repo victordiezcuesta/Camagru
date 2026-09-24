@@ -50,14 +50,51 @@ function clearLiveOverlay()
     context.clearRect(0, 0, liveOverlayCanvas.width, liveOverlayCanvas.height);
 }
 
+function getProcessedCameraDimensions()
+{
+	const originalWidth = camera.videoWidth;
+	const originalHeight = camera.videoHeight;
+
+	const scale = Math.min(1920 / originalWidth, 1440 / originalHeight, 1);
+
+	return {
+		width: Math.round(originalWidth * scale),
+		height: Math.round(originalHeight * scale)
+	};
+}
+
+function getCameraOverlayLayout(width, height)
+{
+	const maxOverlaySize = 500;
+	const maxMargin = 300;
+
+	//Primero intentamos utilizar el mismo tamaño que utilizamos para las fotografías subidas.
+	let overlaySize = Math.min(maxOverlaySize, width, height);
+
+	//Calculamos cuánto margen podemos mantener realmente con el tamaño disponible.
+	let margin = Math.min(maxMargin, Math.floor((width - overlaySize) / 2), Math.floor((height - overlaySize) / 2));
+
+	if (margin < 0)
+		margin = 0;
+
+	//Volvemos a comprobar el tamaño disponible después de calcular el margen.
+	const availableWidth = width - (margin * 2);
+	const availableHeight = height - (margin * 2);
+
+	overlaySize = Math.min(overlaySize, availableWidth, availableHeight);
+
+	return {
+		size: Math.max(0, overlaySize),
+		margin: margin
+	};
+}
+
 function updateLiveOverlay()
 {
 	if (cameraStream === null || camera.videoWidth === 0 || camera.videoHeight === 0 || selectedOverlay === null || liveOverlayImage === null || !liveOverlayImage.complete)
 	{
 		clearLiveOverlay();
-
 		livePreviewAnimationFrame = requestAnimationFrame(updateLiveOverlay);
-
 		return;
 	}
 
@@ -67,7 +104,6 @@ function updateLiveOverlay()
 	if (containerWidth === 0 || containerHeight === 0)
 	{
 		livePreviewAnimationFrame = requestAnimationFrame(updateLiveOverlay);
-
 		return;
 	}
 
@@ -85,9 +121,12 @@ function updateLiveOverlay()
 
 	context.clearRect(0, 0, containerWidth, containerHeight);
 
-	const videoWidth = camera.videoWidth;
-	const videoHeight = camera.videoHeight;
+	const cameraDimensions = getProcessedCameraDimensions();
 
+	const videoWidth = cameraDimensions.width;
+	const videoHeight = cameraDimensions.height;
+
+	//Calculamos cómo se muestra la imagen de la webcam dentro del contenedor manteniendo object-fit: cover.
 	const scale = Math.max(containerWidth / videoWidth, containerHeight / videoHeight);
 
 	const displayedWidth = videoWidth * scale;
@@ -100,12 +139,20 @@ function updateLiveOverlay()
 
 	if (overlayNumber >= 1 && overlayNumber <= 20)
 	{
-		const overlayWidth = 500;
-		const overlayHeight = 500;
+		const layout = getCameraOverlayLayout(videoWidth, videoHeight);
+
+		const overlaySize = layout.size;
+		const margin = layout.margin;
+
+		if (overlaySize <= 0)
+		{
+			clearLiveOverlay();
+			livePreviewAnimationFrame = requestAnimationFrame(updateLiveOverlay);
+			return;
+		}
 
 		if (selectedOverlayPosition === null)
 		{
-			const margin = 300;
 			const positions = [
 				{
 					x: margin,
@@ -113,24 +160,26 @@ function updateLiveOverlay()
 				},
 				{
 					x: margin,
-					y: Math.max(0, videoHeight - overlayHeight - margin)
+					y: videoHeight - overlaySize - margin
 				},
 				{
-					x: Math.max(0, videoWidth - overlayWidth - margin),
+					x: videoWidth - overlaySize - margin,
 					y: margin
 				},
 				{
-					x: Math.max(0, videoWidth - overlayWidth - margin),
-					y: Math.max(0, videoHeight - overlayHeight - margin)
+					x: videoWidth - overlaySize - margin,
+					y: videoHeight - overlaySize - margin
 				}
 			];
 
-			selectedOverlayPosition = positions[
-			Math.floor(
-				Math.random() * positions.length
-			)
-			];
+			selectedOverlayPosition =
+				positions[
+					Math.floor(
+						Math.random() * positions.length
+					)
+				];
 
+			//Guardamos las coordenadas reales que utilizaremos al enviar la foto a PHP.
 			overlayXInput.value = selectedOverlayPosition.x;
 			overlayYInput.value = selectedOverlayPosition.y;
 		}
@@ -138,13 +187,13 @@ function updateLiveOverlay()
 		const x = offsetX + selectedOverlayPosition.x * scale;
 		const y = offsetY + selectedOverlayPosition.y * scale;
 
-		const width = overlayWidth * scale;
-		const height = overlayHeight * scale;
+		const width = overlaySize * scale;
+		const height = overlaySize * scale;
 
 		context.drawImage(liveOverlayImage, x, y, width, height);
 	}
 	else
-		context.drawImage(liveOverlayImage, offsetX, offsetY, displayedWidth, displayedHeight);
+		context.drawImage(liveOverlayImage, offsetX, offsetY, displayedWidth, displayedHeight); //Los overlays 21-23 y 101-105 ocupan toda la imagen
 
 	livePreviewAnimationFrame = requestAnimationFrame(updateLiveOverlay);
 }
@@ -248,12 +297,17 @@ function updatePreview()
 		overlayImage.onload = function ()
 		{
 			const overlayNumber = parseInt(selectedOverlay, 10);
-
 			if (overlayNumber >= 1 && overlayNumber <= 20)
 			{
-				const overlayWidth = 500;
-				const overlayHeight = 500;
-				const margin = 300;
+				const layout = getCameraOverlayLayout(width, height);
+				const overlaySize = layout.size;
+				const margin = layout.margin;
+
+				if (overlaySize <= 0)
+				{
+					showError('Unable to fit the selected overlay.');
+					return;
+				}
 
 				if (selectedOverlayPosition === null)
 				{
@@ -264,31 +318,30 @@ function updatePreview()
 						},
 						{
 							x: margin,
-							y: Math.max(0, height - overlayHeight - margin)
+							y: height - overlaySize - margin
 						},
 						{
-							x: Math.max(0, width - overlayWidth - margin),
+							x: width - overlaySize - margin,
 							y: margin
 						},
 						{
-							x: Math.max(0, width - overlayWidth - margin),
-							y: Math.max(0, height - overlayHeight - margin)
+							x: width - overlaySize - margin,
+							y: height - overlaySize - margin
 						}
 					];
 
-					selectedOverlayPosition = positions[
-						Math.floor(
-							Math.random() * positions.length
-						)
-					];
+					selectedOverlayPosition =
+						positions[
+							Math.floor(
+								Math.random() * positions.length
+							)
+						];
 				}
-
 				//Guardamos la posición para enviársela posteriormente a PHP.
 				overlayXInput.value = selectedOverlayPosition.x;
-
 				overlayYInput.value = selectedOverlayPosition.y;
 
-				context.drawImage(overlayImage, 0, 0, overlayWidth, overlayHeight, selectedOverlayPosition.x, selectedOverlayPosition.y, overlayWidth, overlayHeight);
+				context.drawImage(overlayImage, 0, 0, overlayImage.naturalWidth, overlayImage.naturalHeight, selectedOverlayPosition.x, selectedOverlayPosition.y, overlaySize, overlaySize);
 			}
 			else
 			{
