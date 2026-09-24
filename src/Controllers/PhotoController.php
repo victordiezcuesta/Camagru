@@ -77,8 +77,21 @@ class PhotoController
 		$overlayX = null;
 		$overlayY = null;
 
-		if (isset($_POST['overlay_x'], $_POST['overlay_y']))
+		if (in_array($overlay,
+			[
+				'01', '02', '03', '04', '05',
+				'06', '07', '08', '09', '10',
+				'11', '12', '13', '14', '15',
+				'16', '17', '18', '19', '20'
+			], true))
 		{
+			if (!isset($_POST['overlay_x'], $_POST['overlay_y']))
+			{
+				http_response_code(400);
+				echo 'Invalid overlay position.';
+				exit;
+			}
+
 			$overlayX = filter_var($_POST['overlay_x'], FILTER_VALIDATE_INT);
 			$overlayY = filter_var($_POST['overlay_y'], FILTER_VALIDATE_INT);
 
