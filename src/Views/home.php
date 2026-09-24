@@ -143,6 +143,29 @@
 
 				<?php endif; ?>
 
+				<div class="gallery-pagination-mode">
+
+					<span>
+						Pagination
+					</span>
+
+					<label class="gallery-mode-switch">
+
+						<input
+							type="checkbox"
+							id="gallery-infinite-toggle"
+						>
+
+						<span class="gallery-mode-slider"></span>
+
+					</label>
+
+					<span id="gallery-pagination-mode-label">
+						Traditional
+					</span>
+
+					</div>
+
 			</div>
 
 		</section>
@@ -366,6 +389,43 @@
 
 		</div>
 	</footer>
+
+	<script>
+
+		const galleryInfiniteToggle = document.getElementById('gallery-infinite-toggle');
+		const galleryPaginationModeLabel = document.getElementById('gallery-pagination-mode-label');
+
+		if (galleryInfiniteToggle)
+		{
+			const savedGalleryMode = localStorage.getItem('camagru-gallery-pagination-mode');
+			if (savedGalleryMode === 'infinite')
+			{
+				galleryInfiniteToggle.checked = true;
+				galleryPaginationModeLabel.textContent = 'Infinite';
+			}
+
+
+			galleryInfiniteToggle.addEventListener(
+				'change',
+				function ()
+				{
+					const infiniteMode = this.checked;
+
+
+					localStorage.setItem('camagru-gallery-pagination-mode', infiniteMode
+						? 'infinite'
+						: 'traditional'
+					);
+
+
+					galleryPaginationModeLabel.textContent = infiniteMode
+						? 'Infinite'
+						: 'Traditional';
+				}
+			);
+		}
+
+	</script>
 
 </body>
 </html>

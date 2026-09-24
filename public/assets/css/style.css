@@ -3613,6 +3613,148 @@ GALLERY SOCIAL ACTIONS
     }
 }
 
+/* ---------GALLERY PAGINATION MODE------------*/
+.gallery-pagination-mode {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    margin-top: 25px;
+
+    color: #6b7280;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.gallery-mode-switch {
+    position: relative;
+
+    display: inline-block;
+
+    width: 46px;
+    height: 26px;
+}
+
+.gallery-mode-switch input {
+    width: 0;
+    height: 0;
+
+    opacity: 0;
+}
+
+.gallery-mode-slider {
+    position: absolute;
+
+    inset: 0;
+
+    background: #d1d5db;
+
+    border-radius: 999px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease;
+}
+
+.gallery-mode-slider::before {
+    position: absolute;
+
+    content: "";
+
+    width: 20px;
+    height: 20px;
+
+    left: 3px;
+    top: 3px;
+
+    background: #ffffff;
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.15);
+
+    transition:
+        transform 0.2s ease;
+}
+
+.gallery-mode-switch input:checked
++ .gallery-mode-slider {
+    background: #111827;
+}
+
+.gallery-mode-switch input:checked
++ .gallery-mode-slider::before {
+    transform: translateX(20px);
+}
+
+.gallery-mode-switch input:focus-visible
++ .gallery-mode-slider {
+    outline: 3px solid rgba(17, 24, 39, 0.15);
+    outline-offset: 2px;
+}
+
+/* ---------GALLERY INFINITE PAGINATION----------*/
+.gallery-infinite-loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    min-height: 60px;
+
+    margin-top: 30px;
+
+    color: #6b7280;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.gallery-infinite-spinner {
+    display: block;
+
+    width: 18px;
+    height: 18px;
+
+    border: 2px solid #e5e7eb;
+    border-top-color: #111827;
+
+    border-radius: 50%;
+
+    animation:
+        gallery-infinite-spin 0.7s linear infinite;
+}
+
+@keyframes gallery-infinite-spin {
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+.gallery-infinite-end {
+    margin-top: 30px;
+
+    color: #9ca3af;
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+.gallery-pagination[hidden],
+.gallery-infinite-loader[hidden],
+.gallery-infinite-end[hidden] {
+    display: none;
+}
+
 /* =========================================================
 PHOTO CREATE
 ========================================================= */

@@ -121,6 +121,12 @@ if ($path === '/gallery' && $method === 'GET')
 	exit;
 }
 
+if ($path === '/gallery/load' && $method === 'GET')
+{
+	$galleryController->loadMore();
+	exit;
+}
+
 if ($path === '/photo/create' && $method === 'GET')
 {
 	$photoController->create();
