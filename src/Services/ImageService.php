@@ -56,7 +56,7 @@ class ImageService
 	private const OVERLAY_SIZE = 250;
 	private const OVERLAY_MARGIN = 10;
 
-	public function saveUploadedImage(array $file, string $overlay, ?int $overlayX = null, ?int $overlayY = null): string
+	public function saveUploadedImage(array $file, array $overlays): string
 	{
 		if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK)
 			throw new RuntimeException('Unable to upload image.');
@@ -89,94 +89,44 @@ class ImageService
 		$sourceImage = $this->createImageFromFile($file['tmp_name'], $mimeType);
 		$sourceImage = $this->resizeImageIfNeeded($sourceImage); //redimensionamos el tamaño de la imagen si fuera necesario
 
-		if ($overlay !== '')
+		foreach ($overlays as $item)
 		{
-			$overlayPath = self::OVERLAY_DIRECTORY . self::ALLOWED_OVERLAYS[$overlay]; //ruta exacta de los overlays
+			$overlay = $item['id'];
 
-			if (!is_file($overlayPath))
+			if (!isset(self::ALLOWED_OVERLAYS[$overlay]))
+				throw new RuntimeException(
+					'Invalid overlay.'
+				);
+
+			if (in_array(
+				$overlay,
+				self::RANDOM_POSITION_OVERLAYS,
+				true
+			))
 			{
-				imagedestroy($sourceImage);
-				throw new RuntimeException('Overlay not found.');
-			}
-
-			$overlayImage = imagecreatefrompng($overlayPath); //Lee el overlay y crea en memoria una representación de esa imagen que PHP puede modificar y sea transparente
-
-			if ($overlayImage === false)
-			{
-				imagedestroy($sourceImage); //liberamos la memoria de la funcion imagecreatefrompng
-				throw new RuntimeException('Unable to load overlay.');
-			}
-
-			$width = imagesx($sourceImage); //calcula los tamaños de las fotos
-			$height = imagesy($sourceImage);
-
-			imagealphablending($sourceImage, true); //le decimos a GD que cuando coloquemos el overlay sobre la fotografía, debe respetar la transparencia
-
-			if (in_array($overlay, self::RANDOM_POSITION_OVERLAYS, true))
-			{
-				$overlayWidth = min(self::OVERLAY_SIZE, $width, $height);
-				$margin = min(self::OVERLAY_MARGIN, intdiv($width - $overlayWidth, 2), intdiv($height - $overlayWidth, 2));
-				if ($margin < 0)
-					$margin = 0;
-
-				$overlayWidth = min($overlayWidth, $width - ($margin * 2), $height - ($margin * 2));
-
-				$overlayHeight = $overlayWidth;
-
-				$positions = [
-					[
-						'x' => $margin,
-						'y' => $margin
-					],
-					[
-						'x' => $margin,
-						'y' => max(0, $height - $overlayHeight - $margin)
-					],
-					[
-						'x' => max(0, $width - $overlayWidth - $margin),
-						'y' => $margin
-					],
-					[
-						'x' => max(0, $width - $overlayWidth - $margin),
-						'y' => max(0, $height - $overlayHeight - $margin)
-					]
-				];
-
-				if ($overlayX === null || $overlayY === null)
+				if (
+					!isset($item['position']) ||
+					!is_string($item['position'])
+				)
 				{
-					imagedestroy($overlayImage);
-					imagedestroy($sourceImage);
-					throw new RuntimeException('Invalid overlay position.');
+					throw new RuntimeException(
+						'Invalid overlay position.'
+					);
 				}
 
-				$validPosition = false;
-
-				foreach ($positions as $position)
-				{
-					if ($position['x'] === $overlayX && $position['y'] === $overlayY)
-					{
-						$validPosition = true;
-						break;
-					}
-				}
-
-				if (!$validPosition)
-				{
-					imagedestroy($overlayImage);
-					imagedestroy($sourceImage);
-					throw new RuntimeException('Invalid overlay position.');
-				}
-
-				imagecopy($sourceImage, $overlayImage, $overlayX, $overlayY, 0, 0, $overlayWidth, $overlayHeight);
+				$this->applyRandomOverlay(
+					$sourceImage,
+					$overlay,
+					$item['position']
+				);
 			}
 			else
 			{
-				$overlayWidth = imagesx($overlayImage);
-				$overlayHeight = imagesy($overlayImage);
-				imagecopyresampled($sourceImage, $overlayImage, 0, 0, 0, 0, $width, $height, $overlayWidth, $overlayHeight); //Redimensionamos el overlay y lo colocamos directamente sobre la fotografia
+				$this->applyFullImageOverlay(
+					$sourceImage,
+					$overlay
+				);
 			}
-
-			imagedestroy($overlayImage); //liberamos la memoria del overlay
 		}
 
 		$filename = bin2hex(random_bytes(32)) . '.jpg'; //cambiamos el nombre a la foto por si suben dos fotos con el mismo nobre
@@ -231,4 +181,88 @@ class ImageService
 
 		return $resizedImage;
 	}
+
+	private function getOverlayPosition(string $position, int $width, int $height, int $overlaySize, int $margin): array
+	{
+		if ($position === 'top-left')
+		{
+			return [
+				'x' => $margin,
+				'y' => $margin
+			];
+		}
+
+		if ($position === 'bottom-left')
+		{
+			return [
+				'x' => $margin,
+				'y' => $height - $overlaySize - $margin
+			];
+		}
+
+		if ($position === 'top-right')
+		{
+			return [
+				'x' => $width - $overlaySize - $margin,
+				'y' => $margin
+			];
+		}
+
+		return [
+			'x' => $width - $overlaySize - $margin,
+			'y' => $height - $overlaySize - $margin
+		];
+	}
+
+	private function applyRandomOverlay($image, string $overlay, string $position): void
+	{
+		$width = imagesx($image);
+		$height = imagesy($image);
+
+		$overlaySize = min(self::OVERLAY_SIZE, $width, $height);
+		$margin = min(self::OVERLAY_MARGIN, intdiv($width - $overlaySize, 2), intdiv($height - $overlaySize, 2));
+
+		if ($margin < 0)
+			$margin = 0;
+
+		$maxSizeForFour = (int) floor(min(($width - ($margin * 2)) / 2, ($height - ($margin * 2)) / 2));
+		$overlaySize = min($overlaySize, $maxSizeForFour);
+
+		if ($overlaySize <= 0)
+			throw new RuntimeException('Unable to fit the selected overlays.');
+
+		$overlayPath = self::OVERLAY_DIRECTORY . self::ALLOWED_OVERLAYS[$overlay];
+
+		if (!is_file($overlayPath))
+			throw new RuntimeException('Overlay not found.');
+
+		$overlayImage = imagecreatefrompng($overlayPath);
+
+		if ($overlayImage === false)
+			throw new RuntimeException('Unable to load overlay.');
+
+		$positionCoordinates =$this->getOverlayPosition($position, $width, $height, $overlaySize, $margin);
+		imagealphablending($image, true);
+		imagecopyresampled($image, $overlayImage, $positionCoordinates['x'], $positionCoordinates['y'], 0, 0, $overlaySize, $overlaySize, imagesx($overlayImage), imagesy($overlayImage));
+		imagedestroy($overlayImage);
+	}
+
+	private function applyFullImageOverlay($image, string $overlay): void
+	{
+		$overlayPath = self::OVERLAY_DIRECTORY . self::ALLOWED_OVERLAYS[$overlay];
+
+		if (!is_file($overlayPath))
+			throw new RuntimeException('Overlay not found.');
+
+		$overlayImage = imagecreatefrompng($overlayPath);
+
+		if ($overlayImage === false)
+			throw new RuntimeException('Unable to load overlay.');
+
+		imagealphablending($image, true);
+		imagecopyresampled($image, $overlayImage, 0, 0, 0, 0, imagesx($image), imagesy($image), imagesx($overlayImage), imagesy($overlayImage));
+		imagedestroy($overlayImage);
+	}
+
+
 }

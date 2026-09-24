@@ -74,60 +74,152 @@ class PhotoController
 			exit;
 		}
 
-		$overlay = $_POST['overlay'] ?? ''; //busca el overlay seleccionado desde el js y el html
-		if ($overlay === '')
+		$overlaysJson = $_POST['overlays'] ?? '[]';
+		$overlays = json_decode($overlaysJson, true);
+
+		if (!is_array($overlays))
 		{
 			http_response_code(400);
 
-			$errorTitle = 'Overlay required';
-			$errorMessage = 'Please select an overlay before taking a photo.';
+			$errorTitle = 'Invalid stickers';
+			$errorMessage = 'The selected stickers are invalid.';
 
 			require __DIR__ . '/../Views/error.php';
 			exit;
 		}
 
-		$overlayX = null;
-		$overlayY = null;
-
-		if (in_array($overlay,
-			[
-				'01', '02', '03', '04', '05',
-				'06', '07', '08', '09', '10',
-				'11', '12', '13', '14', '15',
-				'16', '17', '18', '19', '20'
-			], true))
+		if (count($overlays) > 5)
 		{
-			if (!isset($_POST['overlay_x'], $_POST['overlay_y']))
+			http_response_code(400);
+
+			$errorTitle = 'Too many stickers';
+			$errorMessage = 'You can select up to four corner stickers and one full-image sticker.';
+
+			require __DIR__ . '/../Views/error.php';
+			exit;
+		}
+
+		$randomOverlayIds = [
+			'01', '02', '03', '04', '05',
+			'06', '07', '08', '09', '10',
+			'11', '12', '13', '14', '15',
+			'16', '17', '18', '19', '20'
+		];
+
+		$fullImageOverlayIds = [
+			'21', '22', '23',
+			'101', '102', '103', '104', '105'
+		];
+
+		$selectedRandomOverlays = 0;
+		$selectedFullImageOverlays = 0;
+		$usedPositions = [];
+
+		foreach ($overlays as &$item)
+		{
+			if (!is_array($item) || !isset($item['id']) || !is_string($item['id']))
 			{
 				http_response_code(400);
 
-				$errorTitle = 'Invalid overlay position';
-				$errorMessage = 'The selected overlay position is invalid.';
+				$errorTitle = 'Invalid sticker';
+				$errorMessage = 'One of the selected stickers is invalid.';
 
 				require __DIR__ . '/../Views/error.php';
 				exit;
 			}
 
-			$overlayX = filter_var($_POST['overlay_x'], FILTER_VALIDATE_INT);
-			$overlayY = filter_var($_POST['overlay_y'], FILTER_VALIDATE_INT);
+			$overlayId = $item['id'];
 
-			if ($overlayX === false || $overlayY === false)
+			if (!in_array($overlayId, array_merge($randomOverlayIds, $fullImageOverlayIds), true))
 			{
 				http_response_code(400);
 
-				$errorTitle = 'Invalid overlay position';
-				$errorMessage = 'The selected overlay position is invalid.';
+				$errorTitle = 'Invalid sticker';
+				$errorMessage = 'One of the selected stickers is not available.';
 
 				require __DIR__ . '/../Views/error.php';
 				exit;
+			}
+
+			if (in_array($overlayId, $randomOverlayIds, true))
+			{
+				$selectedRandomOverlays++;
+
+				if ($selectedRandomOverlays > 4)
+				{
+					http_response_code(400);
+
+					$errorTitle = 'Too many stickers';
+					$errorMessage = 'You can select a maximum of four corner stickers.';
+
+					require __DIR__ . '/../Views/error.php';
+					exit;
+				}
+
+				if (!isset($item['position']) || !is_string($item['position']))
+				{
+					http_response_code(400);
+
+					$errorTitle = 'Invalid sticker position';
+					$errorMessage = 'One of the sticker positions is invalid.';
+
+					require __DIR__ . '/../Views/error.php';
+					exit;
+				}
+
+				$validPositions = ['top-left', 'bottom-left', 'top-right', 'bottom-right'];
+
+				if (!in_array($item['position'], $validPositions, true))
+				{
+					http_response_code(400);
+
+					$errorTitle = 'Invalid sticker position';
+					$errorMessage = 'One of the sticker positions is invalid.';
+
+					require __DIR__ . '/../Views/error.php';
+					exit;
+				}
+
+				if (in_array($item['position'], $usedPositions, true))
+				{
+					http_response_code(400);
+
+					$errorTitle = 'Overlapping stickers';
+					$errorMessage = 'Two stickers cannot use the same position.';
+
+					require __DIR__ . '/../Views/error.php';
+					exit;
+				}
+
+				$usedPositions[] = $item['position'];
+			}
+			else
+			{
+				$selectedFullImageOverlays++;
+
+				if ($selectedFullImageOverlays > 1)
+				{
+					http_response_code(400);
+
+					$errorTitle = 'Too many stickers';
+					$errorMessage = 'You can select only one full-image sticker.';
+
+					require __DIR__ . '/../Views/error.php';
+					exit;
+				}
+
+				if (isset($item['position']))
+					unset($item['position']);
 			}
 		}
+
+		unset($item);
 
 		$imageService = new ImageService();
 
 		try
 		{
-			$filename = $imageService->saveUploadedImage($_FILES['image'], $overlay, $overlayX, $overlayY);
+			$filename = $imageService->saveUploadedImage($_FILES['image'], $overlays);
 		}
 		catch (RuntimeException $exception)
 		{

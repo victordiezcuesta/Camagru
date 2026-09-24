@@ -114,7 +114,7 @@
                 </h1>
 
                 <p>
-                    Take a photo or upload one and choose an overlay.
+                    Take a photo or upload one and optionally choose one or more stickers.
                 </p>
 
             </div>
@@ -284,13 +284,13 @@
                                 </p>
 
                                 <h2>
-                                    Choose an overlay
+                                    Choose stickers
                                 </h2>
 
                             </div>
 
                             <span>
-                                Required
+                                Optional
                             </span>
 
                         </div>
@@ -1067,23 +1067,9 @@
 
     <input
         type="hidden"
-        id="selected-overlay"
-        name="overlay"
-        value=""
-    >
-
-    <input
-        type="hidden"
-        id="overlay-x"
-        name="overlay_x"
-        value=""
-    >
-
-    <input
-        type="hidden"
-        id="overlay-y"
-        name="overlay_y"
-        value=""
+        id="selected-overlays"
+        name="overlays"
+        value="[]"
     >
 
     <input
