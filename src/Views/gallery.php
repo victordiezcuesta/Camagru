@@ -350,34 +350,14 @@
     <script>
 
         const galleryGrid = document.getElementById('gallery-grid');
-
         const galleryTraditionalPagination = document.getElementById('gallery-traditional-pagination');
+        const galleryInfiniteLoader = document.getElementById('gallery-infinite-loader');
+        const galleryInfiniteEnd = document.getElementById('gallery-infinite-end');
+        const galleryInfiniteMode = localStorage.getItem('camagru-gallery-pagination-mode') === 'infinite';
 
-        const galleryInfiniteLoader =
-            document.getElementById(
-                'gallery-infinite-loader'
-            );
-
-        const galleryInfiniteEnd =
-            document.getElementById(
-                'gallery-infinite-end'
-            );
-
-
-        const galleryInfiniteMode =
-            localStorage.getItem(
-                'camagru-gallery-pagination-mode'
-            ) === 'infinite';
-
-
-        let galleryNextPage =
-            <?= (int) $page + 1 ?>;
-
-        let galleryHasMore =
-            <?= $page < $totalPages ? 'true' : 'false' ?>;
-
+        let galleryNextPage = <?= (int) $page + 1 ?>;
+        let galleryHasMore = <?= $page < $totalPages ? 'true' : 'false' ?>;
         let galleryLoading = false;
-
 
         function updateGalleryPaginationMode()
         {
@@ -414,17 +394,12 @@
 
         async function loadNextGalleryPage()
         {
-            if (
-                galleryLoading ||
-                !galleryHasMore ||
-                !galleryInfiniteMode
-            )
+            if (galleryLoading || !galleryHasMore || !galleryInfiniteMode)
             {
                 return;
             }
 
             galleryLoading = true;
-
             galleryInfiniteLoader.hidden = false;
 
             try
@@ -441,31 +416,15 @@
                     }
                 );
 
-
                 if (!response.ok)
                 {
-                    throw new Error(
-                        'Unable to load more photos.'
-                    );
+                    throw new Error('Unable to load more photos.');
                 }
 
-
-                const data =
-                    await response.json();
-
-
-                galleryGrid.insertAdjacentHTML(
-                    'beforeend',
-                    data.html
-                );
-
-
-                galleryHasMore =
-                    data.hasMore;
-
-                galleryNextPage =
-                    data.nextPage;
-
+                const data = await response.json();
+                galleryGrid.insertAdjacentHTML('beforeend', data.html);
+                galleryHasMore = data.hasMore;
+                galleryNextPage = data.nextPage;
 
                 if (!galleryHasMore)
                 {
@@ -483,19 +442,14 @@
             }
         }
 
-
         updateGalleryPaginationMode();
-
 
         if (galleryInfiniteMode)
         {
-            const galleryInfiniteObserver =
-                new IntersectionObserver(
+            const galleryInfiniteObserver = new IntersectionObserver(
                     function (entries)
                     {
-                        if (
-                            entries[0].isIntersecting
-                        )
+                        if (entries[0].isIntersecting)
                         {
                             loadNextGalleryPage();
                         }
@@ -505,10 +459,7 @@
                     }
                 );
 
-
-            galleryInfiniteObserver.observe(
-                galleryInfiniteLoader
-            );
+            galleryInfiniteObserver.observe(galleryInfiniteLoader);
         }
 
     </script>
