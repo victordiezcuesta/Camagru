@@ -194,7 +194,7 @@ class GalleryInteractionController
 
 		$commenter = $stmt->fetch();
 
-		if ($image['comment_notifications'] && $commenter !== false && (int) $_SESSION['user_id'] !== $this->getImageOwnerId($pdo, $imageId))
+		if ($image['comment_notifications'] && $commenter !== false) // && (int) $_SESSION['user_id'] !== $this->getImageOwnerId($pdo, $imageId))
 		{
 			$imageUrl = rtrim(getenv('APP_URL') ?: 'http://localhost:8080', '/') . '/gallery';
 
@@ -210,7 +210,7 @@ class GalleryInteractionController
 		exit;
 	}
 
-	private function getImageOwnerId(PDO $pdo, int $imageId): int
+	/*private function getImageOwnerId(PDO $pdo, int $imageId): int
 	{
 		$stmt = $pdo->prepare(
 			'SELECT user_id
@@ -224,5 +224,5 @@ class GalleryInteractionController
 
 		$userId = $stmt->fetchColumn();
 		return $userId === false ? 0 : (int) $userId;
-	}
+	}*/
 }

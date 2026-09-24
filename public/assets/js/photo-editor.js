@@ -12,6 +12,7 @@ const imageInput = document.getElementById('image');
 const previewCanvas = document.getElementById('photo-preview-canvas');
 const previewSection = document.getElementById('photo-preview-section');
 const submitPhotoButton = document.getElementById('submit-photo');
+const closePhotoPreviewButton = document.getElementById('close-photo-preview');
 const photoForm = document.getElementById('photo-form');
 const selectedOverlayInput = document.getElementById('selected-overlay');
 const overlayXInput = document.getElementById('overlay-x');
@@ -34,6 +35,35 @@ function clearError()
 {
 	cameraError.textContent = '';
 	cameraError.hidden = true;
+}
+
+function openPhotoPreview()
+{
+	previewSection.hidden = false;
+	previewSection.setAttribute('aria-hidden', 'false');
+
+	updateCameraButtons();
+}
+
+function closePhotoPreview()
+{
+	previewSection.hidden = true;
+	previewSection.setAttribute('aria-hidden', 'true');
+
+	selectedImage = null;
+	imageInput.value = '';
+
+	selectedOverlayPosition = null;
+
+	overlayXInput.value = '';
+	overlayYInput.value = '';
+
+	const context = previewCanvas.getContext('2d');
+
+	if (context !== null)
+		context.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+	updateCameraButtons();
 }
 
 function updatePreview()
@@ -76,8 +106,7 @@ function updatePreview()
 
 		if (selectedOverlay === null)
 		{
-			previewSection.hidden = false;
-			updateCameraButtons();
+			openPhotoPreview();
 			return;
 		}
 
@@ -137,8 +166,7 @@ function updatePreview()
 				context.drawImage(overlayImage, 0, 0, width, height);
 			}
 
-			previewSection.hidden = false;
-			updateCameraButtons();
+			openPhotoPreview();
 		};
 
 		overlayImage.onerror = function ()
@@ -441,6 +469,11 @@ stopCameraButton.addEventListener(
 uploadImageButton.addEventListener(
 	'click',
 	uploadImage
+);
+
+closePhotoPreviewButton.addEventListener(
+	'click',
+	closePhotoPreview
 );
 
 /*por cada vez que seleciones un overlay llama a la funcion selectOverlat*/

@@ -205,50 +205,64 @@
                 </section>
 
                 <!-- PHOTO PREVIEW -->
-                <section
+
+                <div
                     id="photo-preview-section"
-                    class="photo-preview-section"
+                    class="photo-preview-modal"
                     hidden
+                    aria-hidden="true"
                 >
+                    <div
+                        class="photo-preview-modal-content"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="photo-preview-title"
+                    >
 
-                    <div class="photo-section-heading">
+                        <button
+                            type="button"
+                            id="close-photo-preview"
+                            class="photo-preview-close"
+                            aria-label="Discard photo"
+                        >
+                            &times;
+                        </button>
 
-                        <div>
+                        <div class="photo-preview-modal-header">
 
                             <p>
                                 PREVIEW
                             </p>
 
-                            <h2>
+                            <h2 id="photo-preview-title">
                                 Your photo
                             </h2>
 
                         </div>
 
+                        <div class="photo-preview-container">
+
+                            <canvas
+                                id="photo-preview-canvas"
+                            ></canvas>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            id="submit-photo"
+                            class="photo-submit-button"
+                            disabled
+                        >
+                            Upload photo
+                        </button>
+
+                        <p class="photo-preview-help">
+                            If you do not like the result, close the preview and take another photo.
+                        </p>
+
                     </div>
-
-                    <div class="photo-preview-container">
-
-                        <canvas
-                            id="photo-preview-canvas"
-                        ></canvas>
-
-                    </div>
-
-                    <button
-                        type="button"
-                        id="submit-photo"
-                        class="photo-submit-button"
-                        disabled
-                    >
-                        Upload photo
-                    </button>
-
-                    <p class="photo-preview-help">
-                        Select an overlay to continue.
-                    </p>
-
-                </section>
+                </div>
 
                 <!-- CONTROLS -->
                 <aside class="photo-create-controls">
