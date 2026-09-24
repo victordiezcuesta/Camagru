@@ -27,6 +27,7 @@ let selectedImage = null;
 let selectedOverlayPosition = null;
 let liveOverlayImage = null;
 let livePreviewAnimationFrame = null;
+let previousFocusedElement = null;
 
 function showError(message)
 {
@@ -219,6 +220,7 @@ function stopLiveOverlayPreview()
 
 function openPhotoPreview()
 {
+	previousFocusedElement = document.activeElement;
 	previewSection.hidden = false;
 	previewSection.setAttribute('aria-hidden', 'false');
 
@@ -227,6 +229,9 @@ function openPhotoPreview()
 
 function closePhotoPreview()
 {
+	if (previousFocusedElement instanceof HTMLElement)
+		previousFocusedElement.focus();
+
 	previewSection.hidden = true;
 	previewSection.setAttribute('aria-hidden', 'true');
 
