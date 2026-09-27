@@ -46,7 +46,7 @@ The official subject requires the application to provide public, likeable and co
 - Password changes
 - CSRF protection on state-changing forms
 
-The authentication flow covers the main user-management requirements of the Camagru subject. fileciteturn0file0L119-L128
+The authentication flow covers the main user-management requirements of the Camagru subject.
 
 ### 📸 Photo Creation
 
@@ -60,7 +60,7 @@ Authenticated users can access a dedicated creation area to:
 - View previously created photos
 - Delete their own edited images
 
-The subject specifically requires webcam capture, selectable overlays, server-side image composition, upload support and ownership-based deletion. fileciteturn0file0L140-L156
+The subject specifically requires webcam capture, selectable overlays, server-side image composition, upload support and ownership-based deletion.
 
 ### 🖼️ Public Gallery
 
@@ -74,7 +74,7 @@ The subject specifically requires webcam capture, selectable overlays, server-si
 - User notifications for new comments
 - Email notification support
 
-These features follow the gallery requirements defined by the project subject. fileciteturn0file0L129-L136
+These features follow the gallery requirements defined by the project subject.
 
 ### 🛡️ Security
 
@@ -96,7 +96,7 @@ Implemented protections include:
 - `.env` excluded from Git
 - Output escaping to prevent HTML/JavaScript injection
 
-The project specification explicitly requires secure forms and protection against issues such as stored passwords, HTML/JavaScript injection, malicious uploads, SQL injection and unauthorized manipulation of private data. fileciteturn0file0L103-L115
+The project specification explicitly requires secure forms and protection against issues such as stored passwords, HTML/JavaScript injection, malicious uploads, SQL injection and unauthorized manipulation of private data.
 
 ---
 
@@ -182,7 +182,7 @@ MariaDB stores users, images and social interactions.
 | Version control | Git |
 | Development environment | Linux / Ubuntu |
 
-The project constraints require HTML, CSS and JavaScript on the client side, allow server-side languages subject to the PHP standard-library constraint, and require containerized deployment. fileciteturn0file0L70-L90 fileciteturn0file0L161-L170
+The project constraints require HTML, CSS and JavaScript on the client side, allow server-side languages subject to the PHP standard-library constraint, and require containerized deployment.
 
 ---
 
@@ -337,7 +337,7 @@ MAIL_ENCRYPTION=...
 
 **Never commit `.env` or real credentials to Git.**
 
-The Camagru subject explicitly requires credentials, API keys and environment variables to remain local and excluded from Git. fileciteturn0file0L92-L97
+The Camagru subject explicitly requires credentials, API keys and environment variables to remain local and excluded from Git.
 
 ### 3. Start the application
 
@@ -430,7 +430,7 @@ Authenticated users are identified through server-side sessions rather than trus
 
 Uploaded images are validated before being accepted, including file size and detected MIME/image information.
 
-This is particularly important because the subject explicitly considers unrestricted malicious uploads and unsafe user-controlled data to be security failures. fileciteturn0file0L109-L115
+This is particularly important because the subject explicitly considers unrestricted malicious uploads and unsafe user-controlled data to be security failures.
 
 ---
 
@@ -491,7 +491,7 @@ Camagru is focused on understanding the fundamentals behind a web application ra
 - Container networking
 - Environment-based configuration
 
-The subject itself highlights responsive design, DOM manipulation, SQL debugging, CSRF and CORS as part of the concepts introduced by the project. fileciteturn0file0L39-L52
+The subject itself highlights responsive design, DOM manipulation, SQL debugging, CSRF and CORS as part of the concepts introduced by the project.
 
 ---
 
@@ -506,7 +506,7 @@ Camagru's mandatory specification is centered around four areas:
 | Gallery | Public images, pagination, likes, comments and notifications |
 | Editing | Webcam/upload, overlays, server-side composition and image deletion |
 
-The project specification also requires the application to be deployable through containerization. fileciteturn0file0L101-L115 fileciteturn0file0L119-L156
+The project specification also requires the application to be deployable through containerization.
 
 ---
 
