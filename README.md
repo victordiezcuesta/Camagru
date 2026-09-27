@@ -22,7 +22,7 @@ The goal is to build a photo-sharing platform where authenticated users can capt
 
 The project focuses not only on the final product, but also on understanding the fundamentals behind a secure web application: authentication, sessions, password hashing, CSRF protection, input validation, file validation, SQL queries, email verification, password recovery, and containerized deployment.
 
-The official subject requires the application to provide public, likeable and commentable images, authenticated photo editing, server-side image composition, user management and a secure implementation. fileciteturn0file0L55-L67
+The official subject requires the application to provide public, likeable and commentable images, authenticated photo editing, server-side image composition, user management and a secure implementation.
 
 ---
 
