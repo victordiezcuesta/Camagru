@@ -1,0 +1,36 @@
+- ver porque cuando hago un comentario tarda en recargar y si mientras esta recargando le doy varias veces a envar el commmit se envia todas las veces, habria que poner que hasta que no se recargue la aplicacion y se aplique el nuevo comentario no puedas enviar otro o algo asi
+
+verificar esto:
+- Preferencias del usuario
+
+	Una vez iniciada la sesión, el usuario puede realizar modificaciones sin errores:
+
+	su nombre de usuario
+	su contraseña
+	su dirección postal
+	la preferencia de correo electrónico de notificación
+	Cada modificación realizada en esos campos debería tener
+	repercusiones en los datos y la autenticación del usuario. Cambie
+	los valores, cierre la sesión e intente iniciar sesión con las nuevas credenciales.
+
+	Si alguno de estos puntos no es válido, esta parte se considera falsa
+	y se pasa a la siguiente.
+
+
+- Ahora todo gira en torno a los derechos de los usuarios:
+
+	Un usuario puede borrar sus propios cambios, pero no los de los demás.
+
+	La vista de edición solo es accesible si el usuario ha
+	iniciado sesión correctamente. Si intenta acceder a ella de forma anónima, se le redirigirá a
+	la vista de inicio de sesión.
+
+	La galería es pública, pero solo un usuario registrado puede dar "me gusta" y comentar
+	las fotos.
+
+	Si alguno de estos puntos no es válido, esta parte se considera falsa
+	y se pasa a la siguiente.
+
+
+- El proceso de edición de imágenes debe iniciarse en el servidor.
+
