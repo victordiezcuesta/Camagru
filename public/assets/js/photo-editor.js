@@ -80,6 +80,43 @@ function getProcessedCameraDimensions()
 	};
 }
 
+function getCroppedDimensions(originalWidth, originalHeight)
+{
+	const targetWidth = 640;
+	const targetHeight = 480;
+	const targetRatio = targetWidth / targetHeight;
+	const sourceRatio = originalWidth / originalHeight;
+
+	let cropWidth;
+	let cropHeight;
+	let sourceX;
+	let sourceY;
+
+	if (sourceRatio > targetRatio)
+	{
+		cropHeight = originalHeight;
+		cropWidth = Math.round(originalHeight * targetRatio);
+
+		sourceX = Math.floor((originalWidth - cropWidth) / 2);
+		sourceY = 0;
+	}
+	else
+	{
+		cropWidth = originalWidth;
+		cropHeight = Math.round(originalWidth / targetRatio);
+
+		sourceX = 0;
+		sourceY = Math.floor((originalHeight - cropHeight) / 2);
+	}
+
+	return {
+		cropWidth: cropWidth,
+		cropHeight: cropHeight,
+		sourceX: sourceX,
+		sourceY: sourceY
+	};
+}
+
 function getRandomOverlayLayout(width, height)
 {
 	const maxOverlaySize = 250;
@@ -490,9 +527,9 @@ function updatePreview()
 
 		const originalWidth = image.naturalWidth;
 		const originalHeight = image.naturalHeight;
-		const scale = Math.min(1920 / originalWidth, 1440 / originalHeight, 1);
-		const width = Math.round(originalWidth * scale);
-		const height = Math.round(originalHeight * scale);
+		const crop = getCroppedDimensions(originalWidth, originalHeight);
+		const width = 640;
+		const height = 480;
 
 		previewCanvas.width = width;
 		previewCanvas.height = height;
@@ -505,7 +542,7 @@ function updatePreview()
 		}
 
 		context.clearRect(0, 0, width, height);
-		context.drawImage(image, 0, 0, width, height);
+		context.drawImage(image, crop.sourceX, crop.sourceY, crop.cropWidth, crop.cropHeight, 0, 0, width, height);
 		const overlaysToDraw = [];
 
 		selectedOverlays.forEach(function (item)
@@ -525,7 +562,6 @@ function updatePreview()
 					height
 				);
 			};
-
 			overlayImage.src = '/assets/overlays/' + getOverlayFilename(item.id);
 		});
 		openPhotoPreview();

@@ -7,8 +7,8 @@ class ImageService
 	private const UPLOAD_DIRECTORY = __DIR__ . '/../../public/uploads/';
 	private const OVERLAY_DIRECTORY = __DIR__ . '/../../public/assets/overlays/'; //__DIR__ representa la carpeta donde esta el php
 	private const MAX_FILE_SIZE = 5 * 1024 * 1024; // maximo 5 MB
-	private const MAX_IMAGE_WIDTH = 1920; //limitas el ancho y el alto de la imagen por el tema de la memoria del gd
-	private const MAX_IMAGE_HEIGHT = 1440;
+	private const MAX_IMAGE_WIDTH = 640; //limitas el ancho y el alto de la imagen por el tema de la memoria del gd
+	private const MAX_IMAGE_HEIGHT = 480;
 
 	private const ALLOWED_MIME_TYPES = [
 		'image/jpeg' => 'jpg',
@@ -83,49 +83,31 @@ class ImageService
 		if ($width <= 0 || $height <= 0)
 			throw new RuntimeException('Invalid image dimensions.');
 		// Si son demasiado grandes las imagenes las redimensionamos
-		if ($overlay !== '' && !isset(self::ALLOWED_OVERLAYS[$overlay]))
-			throw new RuntimeException('Invalid overlay.');
+		/*if ($overlay !== '' && !isset(self::ALLOWED_OVERLAYS[$overlay]))
+			throw new RuntimeException('Invalid overlay.');*/
 
 		$sourceImage = $this->createImageFromFile($file['tmp_name'], $mimeType);
-		$sourceImage = $this->resizeImageIfNeeded($sourceImage); //redimensionamos el tamaño de la imagen si fuera necesario
+		$sourceImage = $this->resizeImage($sourceImage); //redimensionamos el tamaño de la imagen si fuera necesario
 
 		foreach ($overlays as $item)
 		{
 			$overlay = $item['id'];
 
 			if (!isset(self::ALLOWED_OVERLAYS[$overlay]))
-				throw new RuntimeException(
-					'Invalid overlay.'
-				);
+				throw new RuntimeException('Invalid overlay.');
 
-			if (in_array(
-				$overlay,
-				self::RANDOM_POSITION_OVERLAYS,
-				true
-			))
+			if (in_array($overlay, self::RANDOM_POSITION_OVERLAYS, true))
 			{
-				if (
-					!isset($item['position']) ||
-					!is_string($item['position'])
-				)
+				if (!isset($item['position']) || !is_string($item['position']))
 				{
-					throw new RuntimeException(
-						'Invalid overlay position.'
-					);
+					throw new RuntimeException('Invalid overlay position.');
 				}
 
-				$this->applyRandomOverlay(
-					$sourceImage,
-					$overlay,
-					$item['position']
-				);
+				$this->applyRandomOverlay($sourceImage, $overlay, $item['position']);
 			}
 			else
 			{
-				$this->applyFullImageOverlay(
-					$sourceImage,
-					$overlay
-				);
+				$this->applyFullImageOverlay($sourceImage, $overlay);
 			}
 		}
 
@@ -156,7 +138,7 @@ class ImageService
 		return $image;
 	}
 
-	private function resizeImageIfNeeded($image)
+	/*private function resizeImageIfNeeded($image)
 	{
 		$width = imagesx($image);
 		$height = imagesy($image);
@@ -179,6 +161,49 @@ class ImageService
 		imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
 		imagedestroy($image);
 
+		return $resizedImage;
+	}*/
+
+	private function resizeImage($image)
+	{
+		$sourceWidth = imagesx($image);
+		$sourceHeight = imagesy($image);
+
+		$targetRatio = self::MAX_IMAGE_WIDTH / self::MAX_IMAGE_HEIGHT;
+		$sourceRatio = $sourceWidth / $sourceHeight;
+
+		if ($sourceRatio > $targetRatio)
+		{
+			$cropHeight = $sourceHeight;
+			$cropWidth = (int) round($sourceHeight * $targetRatio);
+
+			$sourceX = (int) floor(($sourceWidth - $cropWidth) / 2);
+			$sourceY = 0;
+		}
+		else
+		{
+			$cropWidth = $sourceWidth;
+			$cropHeight = (int) round($sourceWidth / $targetRatio);
+
+			$sourceX = 0;
+			$sourceY = (int) floor(($sourceHeight - $cropHeight) / 2);
+		}
+
+		$resizedImage = imagecreatetruecolor(self::MAX_IMAGE_WIDTH, self::MAX_IMAGE_HEIGHT);
+
+		if ($resizedImage === false)
+		{
+			imagedestroy($image);
+			throw new RuntimeException('Unable to resize image.');
+		}
+
+		if (!imagecopyresampled($resizedImage, $image, 0, 0, $sourceX, $sourceY, self::MAX_IMAGE_WIDTH, self::MAX_IMAGE_HEIGHT, $cropWidth, $cropHeight))
+		{
+			imagedestroy($image);
+			imagedestroy($resizedImage);
+			throw new RuntimeException('Unable to resize image.');
+		}
+		imagedestroy($image);
 		return $resizedImage;
 	}
 
