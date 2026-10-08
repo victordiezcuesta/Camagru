@@ -391,7 +391,6 @@
             }
         }
 
-
         async function loadNextGalleryPage()
         {
             if (galleryLoading || !galleryHasMore || !galleryInfiniteMode)
@@ -441,6 +440,31 @@
                 galleryLoading = false;
             }
         }
+
+        document.addEventListener('submit', function (event)
+        {
+            const form = event.target;
+
+            if (!form.classList.contains('gallery-popup-comment-form')
+                && !form.classList.contains('gallery-like-form-new'))
+                return;
+
+            if (form.dataset.submitted === '1')
+            {
+                event.preventDefault();
+                return;
+            }
+
+            form.dataset.submitted = '1';
+
+            const button = form.querySelector('button[type="submit"]');
+            if (button)
+                button.disabled = true;
+
+            const textarea = form.querySelector('textarea');
+            if (textarea)
+                textarea.readOnly = true;
+        });
 
         updateGalleryPaginationMode();
 

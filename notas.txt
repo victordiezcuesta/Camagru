@@ -1,4 +1,3 @@
-- ver porque cuando hago un comentario tarda en recargar y si mientras esta recargando le doy varias veces a envar el commmit se envia todas las veces, habria que poner que hasta que no se recargue la aplicacion y se aplique el nuevo comentario no puedas enviar otro o algo asi
 
 verificar esto:
 - Preferencias del usuario
