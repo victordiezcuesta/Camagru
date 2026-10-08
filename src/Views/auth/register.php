@@ -73,6 +73,7 @@
                 <div class="register-card">
 
                     <form
+                        id="register-form"
                         action="/register"
                         method="POST"
                         class="register-form"
@@ -198,6 +199,25 @@
         </div>
 
     </footer>
+
+    <script>
+        const registerForm = document.getElementById('register-form');
+
+        registerForm.addEventListener('submit', function (event)
+        {
+            const button = registerForm.querySelector('button[type="submit"]');
+
+            if (registerForm.dataset.submitted === '1')
+            {
+                event.preventDefault();
+                return;
+            }
+
+            registerForm.dataset.submitted = '1';
+            button.disabled = true;
+            button.textContent = 'Creating account...';
+        });
+    </script>
 
 </body>
 </html>
