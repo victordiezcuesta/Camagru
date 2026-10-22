@@ -14,6 +14,38 @@
   <img src="https://img.shields.io/badge/Nginx-Web_Server-009639?style=for-the-badge&logo=nginx&logoColor=white" alt="Nginx">
 </p>
 
+## 🎬 Demo
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="screenshots/home.png" alt="Home" width="100%">
+      <br><sub><b>Home</b></sub>
+    </td>
+    <td align="center">
+      <img src="screenshots/gallery.png" alt="Public Gallery" width="100%">
+      <br><sub><b>Public Gallery</b></sub>
+    </td>
+  </tr>
+  
+  <tr>
+    <td colspan="2" height="30"></td>
+  </tr>
+
+  <tr>
+    <td align="center">
+      <img src="screenshots/upload_image.png" alt="Upload Image" width="100%">
+      <br><sub><b>Upload Image</b></sub>
+    </td>
+    <td align="center">
+      <img src="screenshots/webcam.png" alt="Webcam" width="100%">
+      <br><sub><b>Webcam</b></sub>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## 📖 About
 
 **Camagru** is a full-stack web application developed for the **42 School Camagru v4.1** project.
