@@ -1,6 +1,5 @@
 notascamagru.txt
 .env
-.env.example
 public/uploads/*
 !public/uploads/.gitkeep
 actualizar.sh
