@@ -350,140 +350,143 @@
     <script>
 
         const galleryGrid = document.getElementById('gallery-grid');
-        const galleryTraditionalPagination = document.getElementById('gallery-traditional-pagination');
-        const galleryInfiniteLoader = document.getElementById('gallery-infinite-loader');
-        const galleryInfiniteEnd = document.getElementById('gallery-infinite-end');
-        const galleryInfiniteMode = localStorage.getItem('camagru-gallery-pagination-mode') === 'infinite';
-
-        let galleryNextPage = <?= (int) $page + 1 ?>;
-        let galleryHasMore = <?= $page < $totalPages ? 'true' : 'false' ?>;
-        let galleryLoading = false;
-
-        function updateGalleryPaginationMode()
+        if (galleryGrid)
         {
-            if (galleryInfiniteMode)
-            {
-                if (galleryTraditionalPagination)
-                {
-                    galleryTraditionalPagination.hidden = true;
-                }
+            const galleryTraditionalPagination = document.getElementById('gallery-traditional-pagination');
+            const galleryInfiniteLoader = document.getElementById('gallery-infinite-loader');
+            const galleryInfiniteEnd = document.getElementById('gallery-infinite-end');
+            const galleryInfiniteMode = localStorage.getItem('camagru-gallery-pagination-mode') === 'infinite';
 
-                if (galleryHasMore)
+            let galleryNextPage = <?= (int) $page + 1 ?>;
+            let galleryHasMore = <?= $page < $totalPages ? 'true' : 'false' ?>;
+            let galleryLoading = false;
+
+            function updateGalleryPaginationMode()
+            {
+                if (galleryInfiniteMode)
                 {
-                    galleryInfiniteLoader.hidden = false;
-                    galleryInfiniteEnd.hidden = true;
+                    if (galleryTraditionalPagination)
+                    {
+                        galleryTraditionalPagination.hidden = true;
+                    }
+
+                    if (galleryHasMore)
+                    {
+                        galleryInfiniteLoader.hidden = false;
+                        galleryInfiniteEnd.hidden = true;
+                    }
+                    else
+                    {
+                        galleryInfiniteLoader.hidden = true;
+                        galleryInfiniteEnd.hidden = false;
+                    }
                 }
                 else
                 {
-                    galleryInfiniteLoader.hidden = true;
-                    galleryInfiniteEnd.hidden = false;
-                }
-            }
-            else
-            {
-                if (galleryTraditionalPagination)
-                {
-                    galleryTraditionalPagination.hidden = false;
-                }
-
-                galleryInfiniteLoader.hidden = true;
-                galleryInfiniteEnd.hidden = true;
-            }
-        }
-
-        async function loadNextGalleryPage()
-        {
-            if (galleryLoading || !galleryHasMore || !galleryInfiniteMode)
-            {
-                return;
-            }
-
-            galleryLoading = true;
-            galleryInfiniteLoader.hidden = false;
-
-            try
-            {
-                const response = await fetch(
-                    '/gallery/load?page=' +
-                    galleryNextPage,
+                    if (galleryTraditionalPagination)
                     {
-                        method: 'GET',
-
-                        headers: {
-                            'Accept': 'application/json'
-                        }
+                        galleryTraditionalPagination.hidden = false;
                     }
-                );
 
-                if (!response.ok)
-                {
-                    throw new Error('Unable to load more photos.');
-                }
-
-                const data = await response.json();
-                galleryGrid.insertAdjacentHTML('beforeend', data.html);
-                galleryHasMore = data.hasMore;
-                galleryNextPage = data.nextPage;
-
-                if (!galleryHasMore)
-                {
                     galleryInfiniteLoader.hidden = true;
-                    galleryInfiniteEnd.hidden = false;
+                    galleryInfiniteEnd.hidden = true;
                 }
             }
-            catch (error)
+
+            async function loadNextGalleryPage()
             {
-                galleryInfiniteLoader.hidden = true;
-            }
-            finally
-            {
-                galleryLoading = false;
-            }
-        }
+                if (galleryLoading || !galleryHasMore || !galleryInfiniteMode)
+                {
+                    return;
+                }
 
-        document.addEventListener('submit', function (event)
-        {
-            const form = event.target;
+                galleryLoading = true;
+                galleryInfiniteLoader.hidden = false;
 
-            if (!form.classList.contains('gallery-popup-comment-form')
-                && !form.classList.contains('gallery-like-form-new'))
-                return;
-
-            if (form.dataset.submitted === '1')
-            {
-                event.preventDefault();
-                return;
-            }
-
-            form.dataset.submitted = '1';
-
-            const button = form.querySelector('button[type="submit"]');
-            if (button)
-                button.disabled = true;
-
-            const textarea = form.querySelector('textarea');
-            if (textarea)
-                textarea.readOnly = true;
-        });
-
-        updateGalleryPaginationMode();
-
-        if (galleryInfiniteMode)
-        {
-            const galleryInfiniteObserver = new IntersectionObserver(
-                    function (entries)
-                    {
-                        if (entries[0].isIntersecting)
+                try
+                {
+                    const response = await fetch(
+                        '/gallery/load?page=' +
+                        galleryNextPage,
                         {
-                            loadNextGalleryPage();
-                        }
-                    },
-                    {
-                        rootMargin: '500px'
-                    }
-                );
+                            method: 'GET',
 
-            galleryInfiniteObserver.observe(galleryInfiniteLoader);
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        }
+                    );
+
+                    if (!response.ok)
+                    {
+                        throw new Error('Unable to load more photos.');
+                    }
+
+                    const data = await response.json();
+                    galleryGrid.insertAdjacentHTML('beforeend', data.html);
+                    galleryHasMore = data.hasMore;
+                    galleryNextPage = data.nextPage;
+
+                    if (!galleryHasMore)
+                    {
+                        galleryInfiniteLoader.hidden = true;
+                        galleryInfiniteEnd.hidden = false;
+                    }
+                }
+                catch (error)
+                {
+                    galleryInfiniteLoader.hidden = true;
+                }
+                finally
+                {
+                    galleryLoading = false;
+                }
+            }
+
+            document.addEventListener('submit', function (event)
+            {
+                const form = event.target;
+
+                if (!form.classList.contains('gallery-popup-comment-form')
+                    && !form.classList.contains('gallery-like-form-new'))
+                    return;
+
+                if (form.dataset.submitted === '1')
+                {
+                    event.preventDefault();
+                    return;
+                }
+
+                form.dataset.submitted = '1';
+
+                const button = form.querySelector('button[type="submit"]');
+                if (button)
+                    button.disabled = true;
+
+                const textarea = form.querySelector('textarea');
+                if (textarea)
+                    textarea.readOnly = true;
+            });
+
+            updateGalleryPaginationMode();
+
+            if (galleryInfiniteMode)
+            {
+                const galleryInfiniteObserver = new IntersectionObserver(
+                        function (entries)
+                        {
+                            if (entries[0].isIntersecting)
+                            {
+                                loadNextGalleryPage();
+                            }
+                        },
+                        {
+                            rootMargin: '500px'
+                        }
+                    );
+
+                galleryInfiniteObserver.observe(galleryInfiniteLoader);
+            }
         }
 
     </script>
