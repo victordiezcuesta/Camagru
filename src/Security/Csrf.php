@@ -11,7 +11,7 @@ class Csrf
 	{
 		Session::start();
 
-		if (!isset($_SESSION['csrf_token']))
+		if (!isset($_SESSION['csrf_token'])) //_SESSION es una variable global que proporciona php cuando hacemos session_start() en session.php y es la variable que guarda los datos de la sesion 
 			$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
 		return $_SESSION['csrf_token'];

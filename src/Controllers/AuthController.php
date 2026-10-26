@@ -10,7 +10,7 @@ require_once __DIR__ . '/../Security/PasswordValidator.php';
 
 class AuthController
 {
-	public function login(): void
+	public function login(): void //login get es cuando el user quiere ver la pagina de login
 	{
 		Session::start();
 
@@ -19,7 +19,7 @@ class AuthController
 		require __DIR__ . '/../Views/auth/login.php';
 	}
 
-	public function loginPost(): void
+	public function loginPost(): void //login post es cuando le damos a intro al introducir los datos
 	{
 		if (!Csrf::validate($_POST['csrf_token'] ?? null)) //$_POST es un array especial que PHP crea automáticamente cuando recibe datos enviados mediante el método HTTP POST
 		{
@@ -57,11 +57,12 @@ class AuthController
 		$database = new Database();
 		$pdo = $database->getConnection();
 
+		//stmt es una variable que decimos quiero preguntar esto a la base de datos, luego ejecuta esa consulta y luego recupera la respuesta
 		$stmt = $pdo->prepare(
 			'SELECT id, username, email, password, email_verified
 			FROM users
 			WHERE username = :username'
-		); //aqui busca el usuario.
+		);
 
 		$stmt->execute([
 			'username' => $username
@@ -104,7 +105,7 @@ class AuthController
 
 		Session::start();
 
-		session_regenerate_id(true);
+		session_regenerate_id(true); // creamos un nuevo id en _SESSION que identifica a eso sesion por seguridad
 
 		$_SESSION['user_id'] = $user['id'];
 		$_SESSION['username'] = $user['username'];
@@ -351,7 +352,7 @@ class AuthController
 			exit;
 		}
 
-		if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+		if (!filter_var($email, FILTER_VALIDATE_EMAIL)) //comprobamos si el correo electrónico tiene un formato válido
 		{
 			http_response_code(400);
 
@@ -666,7 +667,7 @@ class AuthController
 		if (ini_get('session.use_cookies'))
 		{
 			$params = session_get_cookie_params();
-			setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+			setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']); //time() - 42000 lo hacemos para que sea una fecha pasada y asi borramos la cookie de forma inmediata
 		}
 
 		session_destroy();
