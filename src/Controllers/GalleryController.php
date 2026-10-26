@@ -10,7 +10,7 @@ class GalleryController
 {
 	private const IMAGES_PER_PAGE = 5;
 
-	public function index(): void
+	public function index(): void //obtenemos las imagenes para la pagina solicitada
 	{
 		Session::start();
 
@@ -19,7 +19,7 @@ class GalleryController
 		$database = new Database();
 		$pdo = $database->getConnection();
 
-		$page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT);
+		$page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT); //cogemos la pagina que estamos solicitando mediante la url buscando en la url la palabra page y verificando que es un numero
 
 		if ($page === false || $page === null || $page < 1)
 			$page = 1;
@@ -37,7 +37,7 @@ class GalleryController
 		require __DIR__ . '/../Views/gallery.php';
 	}
 
-	public function loadMore(): void
+	public function loadMore(): void //cargamos mas imagenes para la paginacion infinita
 	{
 		Session::start();
 
@@ -59,15 +59,15 @@ class GalleryController
 
 		$images = $this->getImages($pdo, $page);
 
-		ob_start();
+		ob_start(); //activamos el output buffering: todo lo que se imprima a partir de aquí no va al navegador, se guarda en memoria
 
 		require __DIR__ . '/../Views/gallery-cards.php';
 
-		$html = ob_get_clean();
+		$html = ob_get_clean(); //metemos todo lo anterior ,lo que renderizariamos pero al activar el buffer no lo hacemos y lo metemos todo el en buffer
 
-		header('Content-Type: application/json; charset=UTF-8');
+		header('Content-Type: application/json; charset=UTF-8'); //avisamos al navegador de que la respuesta va a ser un json
 
-		echo json_encode([
+		echo json_encode([ //json_encode: convierte el array de PHP a un string JSON
 			'html' => $html,
 			'hasMore' => $page < $totalPages,
 			'nextPage' => $page + 1
@@ -130,7 +130,7 @@ class GalleryController
 				: PDO::PARAM_INT
 		);
 
-		$stmt->bindValue(
+		$stmt->bindValue( //en el hueco de limit de la preparacion de la base de datos mete el valor 5 y tratalo commo entero
 			':limit',
 			self::IMAGES_PER_PAGE,
 			PDO::PARAM_INT
@@ -144,7 +144,7 @@ class GalleryController
 
 		$stmt->execute();
 
-		$images = $stmt->fetchAll();
+		$images = $stmt->fetchAll(); //coge todos los datos que tenemos ahora en el stmt de la base de datos y lo mete en un array como por ejemplo ['id' => 12, 'filename' => 'a.png', 'username' => 'victor', 'like_count' => 3, 'user_liked' => 1]
 
 		foreach ($images as &$image)
 		{
@@ -172,7 +172,7 @@ class GalleryController
 			$image['comments'] = $stmt->fetchAll();
 		}
 
-		unset($image);
+		unset($image); //Después de un foreach por referencia, $image sigue siendo una referencia al último elemento del array. Si la reutilizas más adelante, puedes sobrescribir ese elemento sin querer. unset rompe esa referencia
 
 		return $images;
 	}

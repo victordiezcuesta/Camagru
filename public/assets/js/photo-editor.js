@@ -355,7 +355,7 @@ function drawOverlays(context, overlays, width, height, scale = 1, offsetX = 0, 
 {
 	const layout = getRandomOverlayLayout(width, height);
 
-	overlays.forEach(function (item)
+	overlays.forEach(function (item) //foreach recorremos el array de overlays por cada elemento y le aplicamos la funcioon que continua
 	{
 		const overlayImage = item.image;
 		if (overlayImage === null || !overlayImage.complete)
