@@ -62,6 +62,17 @@ services:
     networks:
       - camagru_network
 
+  adminer:
+    image: adminer
+    container_name: camagru_adminer
+    profiles: ["debug"]
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+    networks:
+      - camagru_network
+
 volumes:
   db_data:
 

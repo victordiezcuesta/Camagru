@@ -5,16 +5,19 @@ all:
 	docker compose up -d --build
 
 down:
-	docker compose down
+	docker compose --profile debug down
 
 logs:
 	docker compose logs -f
 
+adminer:
+	docker compose --profile debug up -d adminer
+
 clean:
-	docker compose down --remove-orphans
+	docker compose --profile debug down --remove-orphans
 
 fclean:
-	docker compose down -v --remove-orphans
+	docker compose --profile debug down -v --remove-orphans
 	docker run --rm \
 			-v "$(PWD)/public/uploads:/uploads" \
 			alpine:latest \
@@ -22,3 +25,5 @@ fclean:
 re:
 	$(MAKE) fclean
 	$(MAKE) all
+
+.PHONY: all adminer down logs clean fclean re
